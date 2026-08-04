@@ -1,93 +1,159 @@
-# agent-skills
+# ExtraHop Agent Skills
 
+A growing collection of Agent Skills that unlock your ExtraHop network telemetry and context for agentic AI workflows.
 
+Each skill is purpose-built to work with the [ExtraHop MCP Server](https://github.com/ExtraHop/agent-mcp) and knows how to drive RevealX tools the right way, so you get accurate, context-aware answers instead of generic AI guesswork. The MCP Server is the recommended path, but the skills aren't tied to it: they can just as well drive the [ExtraHop CLI](https://github.com/ExtraHop/agent-cli) or call the RevealX REST API directly, so they fit whatever setup you already have. Install them into Claude Desktop, Claude Code, Gemini Antigravity, or any MCP-compatible AI client.
 
-## Getting started
+## Getting Started
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+### Install (Claude Desktop)
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+Each skill is packaged as a `.zip` file. Download a skill's `.zip` from the project's Releases page, or build one from a clone with `zip -r extrahop-triage.zip extrahop-triage` (zips are release artifacts, not tracked in the repo). Then, in Claude Desktop:
 
-## Add your files
+1. Go to **Customize → Skills → Add skill → Create skill → Upload a skill**
+2. Drag in the skill's `.zip`
 
-* [Create](https://docs.gitlab.com/user/project/repository/web_editor/#create-a-file) or [upload](https://docs.gitlab.com/user/project/repository/web_editor/#upload-a-file) files
-* [Add files using the command line](https://docs.gitlab.com/topics/git/add_files/#add-files-to-a-git-repository) or push an existing Git repository with the following command:
+No server setup is required beyond having the ExtraHop MCP Server already connected.
 
+### Install (Claude Code)
+
+Install from a local clone. Each skill is its own directory at the repository root:
+
+```bash
+git clone https://github.com/ExtraHop/agent-skills.git
+cd agent-skills
+
+# Copy the skills you want into your Claude Code skills directory
+mkdir -p ~/.claude/skills
+cp -R extrahop-app-discovery extrahop-health-check extrahop-rest-api \
+      extrahop-triage extrahop-pqc-tls-readiness ~/.claude/skills/
 ```
-cd existing_repo
-git remote add origin https://gitlab.i.extrahop.com/opensource/agent-skills.git
-git branch -M main
-git push -uf origin main
+
+Changes take effect on the next session.
+
+### Install (Gemini Antigravity)
+
+Antigravity discovers skills in `~/.gemini/config/skills/` (macOS) or `%USERPROFILE%\.gemini\config\skills\` (Windows). Copy each skill directory from your clone into it:
+
+**macOS**
+
+```bash
+git clone https://github.com/ExtraHop/agent-skills.git
+cd agent-skills
+
+mkdir -p ~/.gemini/config/skills
+cp -R extrahop-app-discovery extrahop-health-check extrahop-rest-api \
+      extrahop-triage extrahop-pqc-tls-readiness ~/.gemini/config/skills/
 ```
 
-## Integrate with your tools
+**Windows** (from the cloned `agent-skills` directory)
 
-* [Set up project integrations](https://gitlab.i.extrahop.com/opensource/agent-skills/-/settings/integrations)
+```cmd
+mkdir "%USERPROFILE%\.gemini\config\skills"
 
-## Collaborate with your team
+xcopy /E /I extrahop-app-discovery     "%USERPROFILE%\.gemini\config\skills\extrahop-app-discovery"
+xcopy /E /I extrahop-health-check      "%USERPROFILE%\.gemini\config\skills\extrahop-health-check"
+xcopy /E /I extrahop-rest-api          "%USERPROFILE%\.gemini\config\skills\extrahop-rest-api"
+xcopy /E /I extrahop-triage            "%USERPROFILE%\.gemini\config\skills\extrahop-triage"
+xcopy /E /I extrahop-pqc-tls-readiness "%USERPROFILE%\.gemini\config\skills\extrahop-pqc-tls-readiness"
+```
 
-* [Invite team members and collaborators](https://docs.gitlab.com/user/project/members/)
-* [Create a new merge request](https://docs.gitlab.com/user/project/merge_requests/creating_merge_requests/)
-* [Automatically close issues from merge requests](https://docs.gitlab.com/user/project/issues/managing_issues/#closing-issues-automatically)
-* [Enable merge request approvals](https://docs.gitlab.com/user/project/merge_requests/approvals/)
-* [Set auto-merge](https://docs.gitlab.com/user/project/merge_requests/auto_merge/)
+Each skill folder must contain a `SKILL.md` at its root. Verify with `find ~/.gemini/config/skills -name "SKILL.md"` (macOS) or `dir /s /b "%USERPROFILE%\.gemini\config\skills\SKILL.md"` (Windows). Restart Antigravity to load the skills; it invokes the right one automatically based on your prompt.
 
-## Test and Deploy
+### Other Clients
 
-Use the built-in continuous integration in GitLab.
+These skills are plain markdown. Any MCP-compatible AI client that can load Agent Skills can use them: point your tool at the skill directories in your clone (each is a top-level folder containing a `SKILL.md`).
 
-* [Get started with GitLab CI/CD](https://docs.gitlab.com/ci/quick_start/)
-* [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/user/application_security/sast/)
-* [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/topics/autodevops/requirements/)
-* [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/user/clusters/agent/)
-* [Set up protected environments](https://docs.gitlab.com/ci/environments/protected_environments/)
+## Skills
 
-***
+This collection grows over time; the table below is a sample of what's available, not the full list. Browse the repository's top-level skill directories for everything currently published, and check each skill's `SKILL.md` for its complete description and example prompts.
 
-# Editing this README
+| Skill | Purpose |
+|-------|---------|
+| `extrahop-triage` | Triage and investigate security detections: separate false positives from true positives, reconstruct attack chains, close noisy detections, and create RevealX investigation cases |
+| `extrahop-health-check` | Run role-aware network and service health checks: root-cause slow apps, auth failures, DNS/HTTP/Kerberos/LDAP/SMB/database issues, and overall infrastructure health |
+| `extrahop-app-discovery` | Discover and map enterprise applications from network traffic: trace app tiers, backend pools behind a VIP, and shadow IT, with device-group and tagging recommendations |
+| `extrahop-rest-api` | Generate Python (`requests`) code for RevealX 360 REST API endpoints not covered by the MCP Server: alerts, triggers, dashboards, watchlists, custom devices, and more |
+| `extrahop-pqc-tls-readiness` | Inventory internal TLS servers (and optionally clients) and assess Post-Quantum Cryptography (PQC) key exchange readiness: which servers and clients were observed using PQC, unique PQC vs. non-PQC client counts, and which named groups (ML-KEM vs. Kyber) were used, as CSV or a self-contained HTML report |
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+> **Note:** `extrahop-rest-api` and `extrahop-pqc-tls-readiness` have RevealX 26.3 dependencies and release July 2026.
 
-## Suggestions for a good README
-
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
-
-## Name
-Choose a self-explaining name for your project.
-
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
-
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
-
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
-
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+Many of these skills complement each other: **App Discovery** hands off to **Health Check** for performance questions and to **Triage** for security concerns, while **REST API** fills in anything the MCP tools don't cover. Install just the ones you need, or all of them.
 
 ## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+A few skills are highlighted below to show the range of what's possible; this isn't the complete set. Each skill activates automatically when your prompt matches what it does, so you rarely need to name it explicitly.
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+### Detection Triage (`extrahop-triage`)
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+Triage and investigate security detections in ExtraHop RevealX. Separates false positives from malicious and benign true positives, reconstructs attack chains, closes noisy detections, and creates RevealX investigation cases. Use for NDR detections, SOC detection triage, alert noise reduction, or incident investigation.
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+Try it with:
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+```
+Show me today's detections
+Find false positives I can close
+Find the ones worth digging into and investigate anything that looks serious
+Investigate this detection
+```
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+### Health Check (`extrahop-health-check`)
+
+Run accurate, role-aware network and service health checks against a RevealX environment. Activates on questions about the state of your network, application performance, or infrastructure health, including symptom descriptions like slow sites, login issues, timeouts, file-share problems, TCP retransmissions, packet loss, authentication failures, or account lockouts.
+
+Try it with:
+
+```
+Run a health check on vip-bk-05
+Assess overall network infrastructure health trends
+Health check app-x-group last 7d
+Are DNS services degraded?
+```
+
+### App Discovery (`extrahop-app-discovery`)
+
+Discover and map enterprise applications based on network traffic analyzed by RevealX. Maps application tiers (web/app/database), traces the backend server pool behind a load balancer or VIP, identifies services by HTTP host/URI or TLS SNI, and surfaces undocumented dependencies and shadow IT. Discovery is read-only and advisory: it observes traffic and recommends a model with device tags and device groups; it does not create groups.
+
+Try it with:
+
+```
+What applications pass through this VIP?
+What apps are running in 10.20.0.0/16?
+Map the checkout service
+How should I group these servers?
+```
+
+### REST API (`extrahop-rest-api`)
+
+Generate Python code (using `requests`) to call the RevealX 360 REST API for endpoints the MCP Server doesn't expose: alerts, triggers, dashboards, reports, activity maps, exclusion intervals, watchlists, custom devices, network localities, bundles, threat collections, ODS targets, users, API keys, audit logs, and any `/api/v1` endpoint. Use when you want a script you can save and rerun, or when the answer isn't obviously an MCP tool.
+
+Try it with:
+
+```
+How do I create an exclusion interval in ExtraHop?
+Write a script to export all alerts to CSV
+Add these IPs to a watchlist
+```
+
+### PQC TLS Readiness (`extrahop-pqc-tls-readiness`)
+
+Inventory internal TLS servers and assess Post-Quantum Cryptography (PQC) key exchange readiness from RevealX metrics. Reports whether a PQC key exchange was *observed* on each server in the window (observation, not a capability claim: no PQC seen doesn't prove a server can't do it), counts unique clients that used PQC vs. non-PQC key exchanges, and can optionally break down *which* named groups were used (standardized ML-KEM vs. pre-standard Kyber) and assess the client side, which of your own endpoints were observed initiating PQC. Output is a per-device CSV or a self-contained, print-ready HTML report built from a bundled brandable template; official ExtraHop branding is an optional add-on (`extrahop-artifacts`), available on request but not required. Read-only and metrics-first: it filters out external devices and aggregates each device's per-sensor copies by `extrahop_id` so counts reflect real internal hosts. Requires RevealX 26.3, where the `post_quantum_kex` metric is available.
+
+Try it with:
+
+```
+Assess our post-quantum TLS readiness
+Which servers haven't negotiated PQC yet?
+Which of my clients were observed initiating PQC key exchange?
+Generate a PQC readiness report as HTML
+```
 
 ## License
-For open source projects, say how it is licensed.
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+Each skill is MIT-licensed; see the `LICENSE` file inside each skill directory (e.g. [`extrahop-triage/LICENSE`](extrahop-triage/LICENSE)) for details.
+
+## Related Repositories
+
+- ExtraHop/agent-skills (this repository)
+- [ExtraHop/agent-mcp](https://github.com/ExtraHop/agent-mcp)
+- [ExtraHop/agent-cli](https://github.com/ExtraHop/agent-cli)

@@ -1,0 +1,252 @@
+{
+  "skill_name": "extrahop-health-check",
+  "description": "Test cases covering scope inference, error reclassification, evidence sufficiency, multi-tier correlation, output formatting, freshness gating, volume-drop detection, workload inference, and sensor deployment caveats. Assertions target the current output spec in reference/output-templates.md: Default mode for interactive checks (H2 title, bold verdict line with middle-dot separator, verdict-first findings bullets, backticked identifiers, console deep-links, no HSI/confidence/YAML in the body), Detailed mode only when explicitly triggered (tagging, scheduled, audit, 'full report'), and Quick-look mode for 'tldr'-style asks. Each prompt represents a realistic question a customer might ask their AI agent in an environment with ExtraHop MCP connected.",
+  "evals": [
+    {
+      "id": 1,
+      "name": "environment-implicit-scope",
+      "prompt": "Run a health check on the network.",
+      "expected_output": "An environment-scope assessment in Default mode. H2 title `## Health Check: Environment`, a bold verdict line using the middle-dot separator (e.g. `**Normal** \u00b7 Last 24 hours \u00b7 3 sensors`), a one-sentence problem statement, 4\u20136 verdict-first findings bullets, a `**Key insight.**` paragraph, and (when not Normal) `What to do` / `Drill in further` sections. Any error reclassification (e.g. NXDOMAIN excluded from DNS) is reflected in the bullet or Key insight. No HSI percentage, no confidence line, no YAML footer, no 'What changed' table in the body \u2014 those belong to Detailed mode only.",
+      "assertions": [
+        {"text": "Title is an H2 `## Health Check: Environment` (not H1, not the Detailed-mode `**Overall status:` opener)"},
+        {"text": "A bold verdict line directly under the title uses the middle-dot separator `\u00b7` and the time window (e.g. `**Normal** \u00b7 Last 24 hours`)"},
+        {"text": "Findings are verdict-first bullets: bold verdict word, italicized category, em-dash, one sentence each"},
+        {"text": "Uses status values from the allowed vocabulary only: Normal, Warning, Degraded, Insufficient Evidence (title case in visible output)"},
+        {"text": "Calls out any error reclassification (e.g. NXDOMAIN excluded from the DNS actionable rate) in a bullet or the Key insight"},
+        {"text": "Default mode body does NOT include an HSI percentage, a Confidence line, a 'What changed' table, or a YAML footer"},
+        {"text": "Device and device-group identifiers appear in backticks; the first occurrence of each is a console deep-link when the appliance FQDN/UUID are available (FQDN from extrahop_get_appliance_metadata display_host/external_hostname, appliance UUID from its hostname field), else plain backticks, never a fabricated URL"},
+        {"text": "No box-drawing characters (\u2550, \u250c, \u2510, \u2500, \u2502, \u2534, \u252c, \u2514, \u2518) in the output"}
+      ],
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "device-symptom-language",
+      "prompt": "Users are saying web-app-01 is slow. Can you check what's going on?",
+      "expected_output": "Device-scope assessment of web-app-01 in Default mode. If latency or 5xx is elevated, the skill follows Playbook 1 and checks backend DB latency before finalizing. If a downstream cause is identified, the Key insight attributes root cause to the downstream tier and the downstream device is promoted as a first-class 'Drill in further' item. Role-aware: web-app-01's primary categories are HTTP, SSL, TCP latency; TCP retransmissions are secondary.",
+      "assertions": [
+        {"text": "Recognizes the symptom-language as a device check on web-app-01 (does NOT default to environment scope)"},
+        {"text": "If HTTP issues are found, attempts a downstream check (backend DB latency or TCP to backends) before finalizing the verdict"},
+        {"text": "If a downstream device is identified as root cause, promotes it as a first-class 'Drill in further' item (e.g. 'Run a full health check on db-prod-02')"},
+        {"text": "Role weighting is applied \u2014 TCP retransmissions are treated as secondary, not primary, for an http_server role"},
+        {"text": "Output follows Default-mode format from reference/output-templates.md (H2 title, bold verdict line with `\u00b7`, verdict-first bullets, Key insight, What to do / Drill in further)"}
+      ],
+      "files": []
+    },
+    {
+      "id": 3,
+      "name": "protocol-fleet-dns",
+      "prompt": "How is DNS performing across our environment?",
+      "expected_output": "Protocol-scope DNS fleet check in Default mode. Discovers DNS servers by role. Capture-level screening first, then samples up to 10 devices. Uses two-pass classification: queries `dns_server:rsp_rcode` and excludes NXDOMAIN. Distinguishes authoritative vs recursive DNS in the latency assessment if mixed roles are present. Ranks per-device results worst-first. When the fleet is bimodal, leads with the shape (e.g. 'most healthy, 3 degraded') rather than an average.",
+      "assertions": [
+        {"text": "Performs two-pass DNS classification (queries the rcode breakdown)"},
+        {"text": "Reclassifies NXDOMAIN as benign and reports the actionable rate (SERVFAIL + FORMERR)"},
+        {"text": "Reports raw and reclassified error rates if both are non-trivial"},
+        {"text": "If servers serve different roles (authoritative vs recursive), applies the correct latency threshold per server"},
+        {"text": "Ranks per-device results worst-first (lowest health first) when listing them"},
+        {"text": "If the fleet is bimodal, the problem statement leads with the shape ('most of the fleet is healthy, but N are degraded'), not a single average"}
+      ],
+      "files": []
+    },
+    {
+      "id": 4,
+      "name": "low-activity-insufficient-evidence",
+      "prompt": "Check Kerberos health on our domain controllers over the last hour.",
+      "expected_output": "If Kerberos response volume is below 100 across the fleet (e.g., off-hours, low activity), the skill returns Insufficient Evidence rather than Normal or Warning. The output explains what's missing with specific numbers (e.g., 'only 31 responses observed, minimum gate is 100') and offers a 'Drill in further' to rerun with a longer window or during business hours.",
+      "assertions": [
+        {"text": "If the minimum activity gate (100 responses) is not met on the driving category, the verdict is Insufficient Evidence, not Normal or Warning"},
+        {"text": "Output explains why evidence is insufficient with specific numbers"},
+        {"text": "No HSI percentage is shown in the Default-mode body"},
+        {"text": "Includes a 'Drill in further' item suggesting a longer window or different time"}
+      ],
+      "files": []
+    },
+    {
+      "id": 5,
+      "name": "tagging-mode-natural-language",
+      "prompt": "Run a health check on dc-01, web-lb-01, and dns-primary and tag the unhealthy ones.",
+      "expected_output": "Device-scope check on the three named devices. Tagging mode is enabled by the natural-language trigger ('tag the unhealthy ones'), which selects Detailed mode output. For each device, after assessment: clears stale Health-Warning and Health-Degraded tags, then applies the appropriate tag if the device is Warning or Degraded. In an interactive session, confirms before applying tag changes. The report includes a TAGGING SUMMARY listing devices tagged, cleared, and any errors.",
+      "assertions": [
+        {"text": "Recognizes 'tag the unhealthy ones' as a tagging-mode trigger and uses Detailed-mode output"},
+        {"text": "Tags only devices that are Warning or Degraded; clears tags on Normal devices"},
+        {"text": "Output includes a TAGGING SUMMARY section listing what was tagged and cleared"},
+        {"text": "In an interactive session, confirms with the user before applying tag changes"}
+      ],
+      "files": []
+    },
+    {
+      "id": 6,
+      "name": "multi-tier-root-cause",
+      "prompt": "Investigate web-app-01 \u2014 HTTP errors are up.",
+      "expected_output": "Device check on web-app-01 in Default mode. After confirming HTTP 5xx is elevated, follows Playbook 1: checks `db_server:tprocess` on backend DBs and `tcp:rto_out` on web\u2192db links. If the downstream DB is also degraded, the web-tier verdict still reflects observable HTTP errors, but the Key insight explains the chain and attributes root cause to the DB, the 'What to do' actions target the DB tier, and the downstream device gets a first-class 'Drill in further' item. The same root cause is not double-counted as two unrelated findings.",
+      "assertions": [
+        {"text": "After identifying elevated HTTP 5xx, queries downstream DB latency or TCP to backends"},
+        {"text": "If a downstream cause is identified, the Key insight explicitly names the downstream tier/device as root cause"},
+        {"text": "'What to do' actions target the actual root cause (DB on-call), not just the symptom tier"},
+        {"text": "The downstream device (e.g. db-prod-02) gets a first-class 'Drill in further' item (e.g. 'Run a full health check on db-prod-02')"},
+        {"text": "Does not double-count the same root cause as two separate unrelated findings"}
+      ],
+      "files": []
+    },
+    {
+      "id": 7,
+      "name": "asymmetric-routing-caveat",
+      "prompt": "Check overall network health for the past hour.",
+      "expected_output": "Environment check in Default mode. If a sensor's `tcp:unidirectional_flows` exceeds 25% of total flows, the skill does NOT issue TCP-based Warning/Degraded verdicts for that sensor. Instead it folds an asymmetric-routing caveat into the Key insight and recommends investigating sensor deployment as a 'What to do' action.",
+      "assertions": [
+        {"text": "Queries `tcp:unidirectional_flows` at capture level"},
+        {"text": "If unidirectional_flows exceeds 25% on a sensor, TCP-based verdicts for that sensor are downgraded or suppressed"},
+        {"text": "When asymmetric routing is detected, the output includes a 'What to do' recommendation to investigate sensor deployment"},
+        {"text": "The asymmetric-routing limitation is surfaced in the Key insight (Default mode folds Medium/Low confidence into Key insight rather than a separate Confidence line)"}
+      ],
+      "files": []
+    },
+    {
+      "id": 8,
+      "name": "ambiguous-scope-defaults-to-environment",
+      "prompt": "Is the network slow?",
+      "expected_output": "Ambiguous prompt with no specific target. The skill defaults to environment scope and runs the standard environment procedure in Default mode, then offers 'Drill in further' items for narrower investigation into a device or protocol.",
+      "assertions": [
+        {"text": "Defaults to environment scope (does not ask for clarification before producing anything)"},
+        {"text": "Produces a complete environment report in Default-mode format (H2 title, bold verdict line, verdict-first bullets, Key insight)"},
+        {"text": "Offers 'Drill in further' items for narrower investigation"}
+      ],
+      "files": []
+    },
+    {
+      "id": 9,
+      "name": "kerberos-preauth-required-false-positive",
+      "prompt": "Check the health of dc-east-01.",
+      "expected_output": "Device check on a domain controller in Default mode. If raw Kerberos `rsp_error` is around 8% (typical AD environment), the breakdown shows that the vast majority (90%+) is `KDC_ERR_PREAUTH_REQUIRED`, which is benign. The skill reports Kerberos as Normal and explicitly notes the reclassification (raw rate vs actionable rate) in the bullet or Key insight.",
+      "assertions": [
+        {"text": "Queries the Kerberos error breakdown (`kerberos_server_detail:error_msg`), not just `rsp_error`"},
+        {"text": "Reclassifies `KDC_ERR_PREAUTH_REQUIRED` as benign and excludes it from the actionable rate"},
+        {"text": "Reports Kerberos status as Normal (not Warning) when the actionable rate is < 1%"},
+        {"text": "Output explicitly notes the reclassification (raw rate vs actionable rate)"}
+      ],
+      "files": []
+    },
+    {
+      "id": 10,
+      "name": "silent-outage-volume-drop",
+      "prompt": "Quick check on our DNS servers.",
+      "expected_output": "Protocol fleet check on DNS. If a DNS server's request volume has dropped > 5\u00d7 from baseline (silent-outage signature) while error rates on residual traffic look fine, the skill issues Warning or Degraded for that server on a request-volume finding. The problem statement / Key insight calls out a possible service outage, maintenance, or isolation, recommends verifying reachability as a 'What to do' action, and checks whether peer DNS servers absorbed the displaced load.",
+      "assertions": [
+        {"text": "Queries request volume (`dns:rsp` or `dns_server:rsp` count) alongside error metrics"},
+        {"text": "Detects the > 5\u00d7 volume drop on the affected server as a finding even when the error rate is normal"},
+        {"text": "Verdict is Warning or Degraded (not Normal) for the volume-drop case"},
+        {"text": "Problem statement or Key insight mentions the silent-outage / service-down / maintenance possibility"},
+        {"text": "Recommends verifying reachability of the affected server as a 'What to do' action"},
+        {"text": "Checks whether peer DNS servers are absorbing the displaced load and notes it"}
+      ],
+      "files": []
+    },
+    {
+      "id": 11,
+      "name": "stale-data-freshness-gate",
+      "prompt": "Run a health check on the network.",
+      "expected_output": "The pre-assessment freshness check finds that the most recent capture-level data is > 10 minutes old. The skill does NOT report Normal regardless of what the stale metrics show \u2014 instead the report IS the freshness warning: verdict Insufficient Evidence with `\u00b7 Data stale`, an explanation of the staleness with a specific duration, and 'What to do' actions to investigate sensor/appliance connectivity. Staleness is not buried in a confidence caveat.",
+      "assertions": [
+        {"text": "Queries data freshness (e.g., most recent net:bytes bucket timestamp) before running the assessment"},
+        {"text": "If data is > 10 minutes stale, returns Insufficient Evidence regardless of metric values"},
+        {"text": "Does NOT issue a Normal verdict on stale data"},
+        {"text": "The report leads with the freshness problem (e.g. verdict line `**Insufficient Evidence** \u00b7 Data stale`) and states a specific staleness duration"},
+        {"text": "Recommends a 'What to do' action to investigate ExtraHop sensor/appliance connectivity"}
+      ],
+      "files": []
+    },
+    {
+      "id": 12,
+      "name": "data-warehouse-oltp-threshold-misapplication",
+      "prompt": "Check the health of dwh-prod-01 (it's our Snowflake proxy).",
+      "expected_output": "Device check on a database server with naming and workload patterns indicating OLAP / data warehouse. The skill infers the workload type (high rsp_ttlb, multi-second baseline tprocess) and applies the OLAP latency thresholds (< 5s normal, > 30s degraded) rather than OLTP thresholds. A 2-second p50 latency does NOT produce a Degraded verdict on an OLAP server, and the workload inference is noted in the Key insight.",
+      "assertions": [
+        {"text": "Infers workload type before applying latency thresholds (queries rsp_ttlb or notes naming/role signals)"},
+        {"text": "Applies OLAP latency thresholds when the workload is OLAP (does NOT use the 100ms / 500ms OLTP bands)"},
+        {"text": "Notes the workload inference in the Key insight (e.g. 'workload type: OLAP / data warehouse')"},
+        {"text": "Does NOT issue Warning or Degraded on multi-second latency that is normal for OLAP"}
+      ],
+      "files": []
+    },
+    {
+      "id": 13,
+      "name": "low-volume-baseline-percentage-noise",
+      "prompt": "Check ldap-secondary-01 for the last hour.",
+      "expected_output": "Device check on a low-volume LDAP server. If baseline volume was below 100 responses, the skill does NOT report a percentage change like 'errors up 233% (3 \u2192 10)' \u2014 that's noise. Instead it falls back to peer comparison (other LDAP servers in the fleet) or reports raw counts, and notes the methodology choice in the Key insight.",
+      "assertions": [
+        {"text": "Checks baseline volume before computing a percentage change"},
+        {"text": "If baseline volume is below 100 responses, does NOT report a percentage change like '+233% (3\u219210)'"},
+        {"text": "Falls back to peer comparison or raw counts when the baseline is too small"},
+        {"text": "Notes the methodology choice in the Key insight ('baseline volume insufficient' or 'compared to peer LDAP servers')"}
+      ],
+      "files": []
+    },
+    {
+      "id": 14,
+      "name": "quick-look-tldr",
+      "prompt": "tldr on the network please",
+      "expected_output": "User explicitly requests a brief format ('tldr'), which triggers Quick-look mode: H2 title, the bold verdict line with the time window, one problem-statement sentence, and an offer to elaborate. No findings list, no Key insight, no next-steps sections, no HSI, and no multi-column tables.",
+      "assertions": [
+        {"text": "Recognizes 'tldr' as a Quick-look mode trigger"},
+        {"text": "Output is just the H2 title, the bold verdict line, one problem-statement sentence, and an offer to elaborate"},
+        {"text": "Output does NOT include a findings list, a Key insight paragraph, next-steps sections, or any multi-column table"},
+        {"text": "Does NOT include an HSI line (Quick-look never shows HSI)"},
+        {"text": "Offers a follow-up to ask for the full report or to drill into a specific finding"}
+      ],
+      "files": []
+    },
+    {
+      "id": 15,
+      "name": "detailed-mode-full-report-with-hsi",
+      "prompt": "Run a detailed health check on web-app-01 for the last hour and include the full structured report.",
+      "expected_output": "The explicit 'detailed' / 'full structured report' request triggers Detailed mode on a device check of web-app-01 with sufficient activity (> 100 HTTP responses). Detailed mode includes the Overall status / User impact / Likely cause opener, a Confidence line with a decision aid, an HSI line with percentage and band, a 'What changed' table, per-category subsections, and a collapsed machine-readable YAML footer. The HSI decomposes into Satisfied / Tolerating / Frustrated buckets using the HTTP application thresholds (T=200ms, 4T=800ms) with 5xx treated as Frustrated.",
+      "assertions": [
+        {"text": "Recognizes 'detailed' / 'full structured report' as a Detailed-mode trigger"},
+        {"text": "Output includes the Detailed-mode opener (Overall status / User impact / Likely cause) and a Confidence line with a decision aid"},
+        {"text": "Output includes an HSI line with a percentage and band label, decomposed into Satisfied / Tolerating / Frustrated bucket counts in the body or YAML footer"},
+        {"text": "Bucket classification uses HTTP application thresholds (T=200ms) and treats 5xx errors as Frustrated; HSI \u2248 (Satisfied + 0.5\u00d7Tolerating)/Total within rounding tolerance"},
+        {"text": "Output includes a 'What changed' table and a collapsed machine-readable YAML footer (in a <details> block or similar)"}
+      ],
+      "files": []
+    },
+    {
+      "id": 16,
+      "name": "account-lockout-first-class-finding",
+      "prompt": "Check dc-east-01 for the last hour.",
+      "expected_output": "Device check on a domain controller in Default mode. If `account_lockout` is non-trivial (\u2265 5 lockouts OR \u2265 3\u00d7 baseline rate), the lockout appears as its own findings bullet \u2014 not buried inside a general Kerberos sentence. The lockout pattern (broad vs concentrated, with/without PREAUTH_FAILED) informs the recommended 'What to do' action (security paging, MFA check, or service-account rotation).",
+      "assertions": [
+        {"text": "If the account_lockout count is non-trivial, it appears as its own findings bullet"},
+        {"text": "The output characterizes the lockout pattern (broad vs concentrated, coincident with other auth signals)"},
+        {"text": "Recommended 'What to do' actions match the pattern: security paging for a broad spike, service-account rotation for a steady low rate, MFA upstream check for a concentrated spike"}
+      ],
+      "files": []
+    },
+    {
+      "id": 17,
+      "name": "virtualized-sensor-vpc-mirror-loss",
+      "prompt": "Why are we seeing so many TCP retransmissions on our cloud sensor?",
+      "expected_output": "Investigation of TCP retransmissions on a cloud-deployed sensor. If unidirectional_flows is broadly distributed (not concentrated on one peer) and setup_time isn't uniformly elevated, the skill recognizes this as a likely VPC traffic-mirroring loss signature rather than a real network problem, and recommends investigating mirror capacity / sensor deployment quality as a 'What to do' action rather than issuing a Degraded network verdict.",
+      "assertions": [
+        {"text": "Considers sensor deployment quality (VPC mirroring, SPAN oversubscription) when TCP issues are observed on a cloud sensor"},
+        {"text": "If unidirectional_flows is high AND broadly distributed, characterizes the finding as a likely sensor-deployment issue rather than a network problem"},
+        {"text": "Recommends investigating mirror capacity / SPAN configuration as a 'What to do' action"},
+        {"text": "Does NOT issue a Degraded network verdict when the evidence is consistent with sensor-side packet loss"}
+      ],
+      "files": []
+    },
+    {
+      "id": 18,
+      "name": "console-deep-link-metadata-field-mapping",
+      "prompt": "Run a health check on web-app-01 and link it to the console.",
+      "expected_output": "Device check on web-app-01 in Default mode. To build the console deep-link, the skill calls extrahop_get_appliance_metadata once and reads the FQDN from the display_host field (falling back to external_hostname), and the appliance UUID from the hostname field (a 32-hex value, not a domain name). It builds the device URL as https://<fqdn>/extrahop/#/metrics/devices/<appliance_uuid>.<discovery_id>/<slug>?... scoped to the assessment window. It never uses the hostname field as the FQDN and never uses mgmt_ipaddr. If extrahop_get_appliance_metadata is unavailable and no FQDN can be obtained another way, it emits the report with plain backticked identifiers rather than a fabricated URL.",
+      "assertions": [
+        {"text": "Calls extrahop_get_appliance_metadata to obtain the console FQDN and appliance UUID"},
+        {"text": "Uses display_host (or external_hostname) as the FQDN \u2014 NOT the hostname field and NOT mgmt_ipaddr"},
+        {"text": "Uses the hostname field (32-hex) as the appliance UUID in the <appliance_uuid>.<discovery_id> device path"},
+        {"text": "The deep-link is scoped to the assessment time window (matching from/interval_type, or absolute seconds)"},
+        {"text": "If the FQDN cannot be obtained, emits plain backticked identifiers instead of a fabricated URL"}
+      ],
+      "files": []
+    }
+  ]
+}
