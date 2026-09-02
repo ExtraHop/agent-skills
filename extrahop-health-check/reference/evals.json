@@ -14,7 +14,7 @@
         {"text": "Uses status values from the allowed vocabulary only: Normal, Warning, Degraded, Insufficient Evidence (title case in visible output)"},
         {"text": "Calls out any error reclassification (e.g. NXDOMAIN excluded from the DNS actionable rate) in a bullet or the Key insight"},
         {"text": "Default mode body does NOT include an HSI percentage, a Confidence line, a 'What changed' table, or a YAML footer"},
-        {"text": "Device and device-group identifiers appear in backticks; the first occurrence of each is a console deep-link when the appliance FQDN/UUID are available (FQDN from extrahop_get_appliance_metadata display_host/external_hostname, appliance UUID from its hostname field), else plain backticks, never a fabricated URL"},
+        {"text": "Device and device-group identifiers appear in backticks. Device identifiers remain unlinked. Device-group links use the available console FQDN; never fabricates URLs."},
         {"text": "No box-drawing characters (\u2550, \u250c, \u2510, \u2500, \u2502, \u2534, \u252c, \u2514, \u2518) in the output"}
       ],
       "files": []
@@ -236,15 +236,25 @@
     },
     {
       "id": 18,
-      "name": "console-deep-link-metadata-field-mapping",
+      "name": "device-links-deferred-with-current-mcp",
       "prompt": "Run a health check on web-app-01 and link it to the console.",
-      "expected_output": "Device check on web-app-01 in Default mode. To build the console deep-link, the skill calls extrahop_get_appliance_metadata once and reads the FQDN from the display_host field (falling back to external_hostname), and the appliance UUID from the hostname field (a 32-hex value, not a domain name). It builds the device URL as https://<fqdn>/extrahop/#/metrics/devices/<appliance_uuid>.<discovery_id>/<slug>?... scoped to the assessment window. It never uses the hostname field as the FQDN and never uses mgmt_ipaddr. If extrahop_get_appliance_metadata is unavailable and no FQDN can be obtained another way, it emits the report with plain backticked identifiers rather than a fabricated URL.",
+      "expected_output": "Completes the health check on web-app-01 with a plain backticked identifier. Briefly explains that reliable device links are not currently supported.",
       "assertions": [
-        {"text": "Calls extrahop_get_appliance_metadata to obtain the console FQDN and appliance UUID"},
-        {"text": "Uses display_host (or external_hostname) as the FQDN \u2014 NOT the hostname field and NOT mgmt_ipaddr"},
-        {"text": "Uses the hostname field (32-hex) as the appliance UUID in the <appliance_uuid>.<discovery_id> device path"},
-        {"text": "The deep-link is scoped to the assessment time window (matching from/interval_type, or absolute seconds)"},
-        {"text": "If the FQDN cannot be obtained, emits plain backticked identifiers instead of a fabricated URL"}
+        {"text": "Completes the health check and keeps web-app-01 unlinked"},
+        {"text": "Briefly explains the limitation because the user requested a device link"},
+        {"text": "Does not attempt to construct a device URL or fetch metadata solely for one"}
+      ],
+      "files": []
+    },
+    {
+      "id": 19,
+      "name": "device-links-deferred-despite-pasted-url",
+      "prompt": "This link works for dc-01: https://tenant.cloud.extrahop.com/extrahop/#/metrics/devices/a1b2c3d4e5f6478899aabbccddeeff00.0123456789abcdef/kerberos-server?delta_type&from=1&interval_type=DAY&until=0. Now run a health check on web-app-02 and link it to the console.",
+      "expected_output": "Completes the health check on web-app-02 with a plain backticked identifier, despite the pasted device URL. Briefly explains that reliable device links are not currently supported.",
+      "assertions": [
+        {"text": "Completes the health check and keeps all device identifiers unlinked"},
+        {"text": "Does not reuse the pasted device URL or its IDs to construct device links"},
+        {"text": "Briefly explains the device-link limitation"}
       ],
       "files": []
     }

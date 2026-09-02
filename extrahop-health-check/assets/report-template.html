@@ -43,15 +43,8 @@
   render as text, never execute. See reference/html-report.md.
 
   Identifiers (devices, hosts, IPs) render in mono via <span class="id"> —
-  mirroring the backtick convention in chat. LINK DEVICES THOROUGHLY: wrap the
-  <span class="id"> in an <a> to its RevealX console page. Link the title device,
-  and the FIRST mention of every device in EACH section (Findings, Key insight,
-  What to do, Drill in further) — so a reader skimming any one section can click
-  through. Point the link at the protocol page the finding is about (http-server,
-  db-server, tcp, …) or /overview when general; see console-urls.md for the slug
-  table and URL syntax. Only IPs/hosts that aren't discovered devices, and
-  paste-back chat prompts, stay unlinked. If the console FQDN/UUID is unavailable,
-  leave everything unlinked — never guess a URL.
+  mirroring the backtick convention in chat.
+
   ============================================================================
 -->
 <title>Health Assessment — web-app-01</title>
@@ -171,7 +164,7 @@ ul.actions li::before{content:"";position:absolute;left:2px;top:.5em;width:6px;h
     <svg class="logo" role="img" aria-label="ExtraHop" viewBox="0 0 223.8 22.1" xmlns="http://www.w3.org/2000/svg"><g fill="#FFFFFF"><path d="M0,0h15.9v5.1h-10v3.4h8.2v4.8H5.8V17h10.7v5.1H0V0z M26.9,10.8L19.4,0h7.2l3.7,5.7L33.8,0h6.5l-6.8,10.2 L41.8,22h-7.3L30,15.3l-4.3,6.8h-6.4L26.9,10.8z M49.3,5.1h-6.8V0h19.4v5.1h-6.7V22h-5.9V5.1z M66,0h9.1c1.2,0,2.3,0.2,3.2,0.5 c1,0.3,1.8,0.8,2.5,1.4s1.2,1.4,1.6,2.3S83,6.1,83,7.3c0,1.5-0.3,2.7-1,3.8c-0.6,1.1-1.5,1.9-2.5,2.6l4.7,8.5h-6.3l-3.7-7.5h-2.4 v7.5H66V0z M74.5,10c0.8,0,1.4-0.2,1.9-0.7s0.7-1.1,0.7-1.9s-0.2-1.5-0.7-2s-1.1-0.7-1.9-0.7h-2.8V10H74.5z M94.2,0h6.7l7.8,22 h-6.3l-1.4-4.6h-7.4L92.1,22h-6L94.2,0z M99.8,13.2l-2.4-8.1l-2.5,8.1H99.8z M112.7,0h5.8v8.1h13V0h5.8v22h-5.8v-8.6h-13V22h-5.8V0 z M153.2,22c-1.6,0-3-0.3-4.4-0.8c-1.3-0.6-2.5-1.3-3.5-2.3s-1.7-2.1-2.3-3.5c-0.5-1.4-0.8-2.8-0.8-4.4s0.3-3.1,0.8-4.4 c0.5-1.4,1.3-2.5,2.3-3.5s2.1-1.7,3.5-2.3c1.3-0.5,2.8-0.8,4.4-0.8H166c1.6,0,3,0.3,4.4,0.8c1.3,0.6,2.5,1.3,3.5,2.3 s1.7,2.1,2.3,3.5C176.7,8,177,9.4,177,11s-0.3,3.1-0.8,4.4c-0.5,1.4-1.3,2.5-2.3,3.5s-2.1,1.7-3.5,2.3c-1.3,0.5-2.8,0.8-4.4,0.8 C166,22,153.2,22,153.2,22z M166.1,16.8c0.8,0,1.5-0.2,2.2-0.5c0.6-0.3,1.2-0.7,1.6-1.2c0.4-0.5,0.8-1.1,1-1.9 c0.2-0.7,0.3-1.5,0.3-2.3s-0.1-1.5-0.3-2.3c-0.2-0.7-0.6-1.3-1-1.9c-0.4-0.5-1-0.9-1.6-1.2S166.9,5,166.1,5h-12.8 c-0.8,0-1.5,0.2-2.2,0.5c-0.6,0.3-1.2,0.7-1.6,1.2c-0.4,0.5-0.8,1.1-1,1.9c-0.2,0.7-0.3,1.5-0.3,2.3s0.1,1.5,0.3,2.3 c0.2,0.7,0.6,1.3,1,1.9c0.4,0.5,1,0.9,1.6,1.2c0.6,0.3,1.4,0.5,2.2,0.5H166.1z M181.9,0h25.2c1.2,0,2.3,0.2,3.2,0.5 c1,0.3,1.8,0.8,2.5,1.4s1.2,1.4,1.6,2.3c0.4,0.9,0.6,2,0.6,3.2c0,1.1-0.2,2.1-0.6,3.1c-0.4,0.9-0.9,1.7-1.6,2.3 c-0.7,0.7-1.5,1.1-2.4,1.5c-0.9,0.3-2,0.5-3.1,0.5h-19.7v7.3h-5.7V0z M206.7,10.1c0.8,0,1.4-0.3,1.9-0.8s0.7-1.2,0.7-1.9 c0-0.8-0.2-1.5-0.7-2c-0.4-0.5-1.1-0.8-1.9-0.8h-19v5.5H206.7z"/><path d="M222,3.8c-0.3,0-0.6-0.1-0.9-0.2c-0.3-0.2-0.5-0.4-0.7-0.7s-0.2-0.6-0.2-1s0.1-0.7,0.2-1c0.2-0.3,0.4-0.5,0.7-0.7 S221.7,0,222,0c0.3,0,0.6,0.1,0.9,0.2c0.3,0.2,0.5,0.4,0.7,0.7s0.2,0.6,0.2,1s-0.1,0.7-0.2,1c-0.2,0.3-0.4,0.5-0.7,0.7 C222.6,3.8,222.3,3.8,222,3.8z M222,3.5c0.3,0,0.5-0.1,0.7-0.2c0.2-0.1,0.4-0.3,0.5-0.6c0.1-0.2,0.2-0.5,0.2-0.8s-0.1-0.6-0.2-0.8 c-0.1-0.2-0.3-0.4-0.5-0.6c-0.2-0.1-0.5-0.2-0.7-0.2c-0.3,0-0.5,0.1-0.7,0.2s-0.4,0.3-0.5,0.6c-0.1,0.2-0.2,0.5-0.2,0.8 s0.1,0.6,0.2,0.8c0.1,0.2,0.3,0.4,0.5,0.6C221.5,3.4,221.7,3.5,222,3.5z M221.3,2.9v-2h0.7c0.2,0,0.4,0,0.5,0.1s0.2,0.3,0.2,0.5 c0,0.1,0,0.2-0.1,0.3S222.4,2,222.3,2l0.4,0.8h-0.4L222,2.1h-0.4v0.7L221.3,2.9L221.3,2.9z M221.7,1.9h0.3c0.1,0,0.2,0,0.3-0.1 s0.1-0.1,0.1-0.2s0-0.2-0.1-0.2c-0.1-0.1-0.2-0.1-0.3-0.1h-0.3V1.9z"/></g></svg>
   </div>
   <div class="doc-kind">Health Assessment</div>
-  <h1 class="report-title"><a href="https://revealx.example.com/extrahop/#/metrics/devices/7946be2a04354967a2ff79788087ee24.02bc5bb970bf0000/overview/?from=1&interval_type=HR&until=0"><span class="id">web-app-01</span></a></h1>
+  <h1 class="report-title"><span class="id">web-app-01</span></h1>
   <!-- STATUS TAG: verdict + NEW/CHRONIC modifier. Match data-sev to the <body> value. -->
   <span class="status-tag" data-sev="critical">Degraded · New</span>
   <p class="subtitle">HTTP 5xx errors are elevated on <span class="id">web-app-01</span>, but the root cause is database latency on <span class="id">db-prod-02</span> — not the web tier itself.</p>
@@ -188,28 +181,28 @@ ul.actions li::before{content:"";position:absolute;left:2px;top:.5em;width:6px;h
 <!-- FINDINGS: verdict-first bullets. 4–6 max. Sub-bullets allowed for per-server breakdowns. -->
 <h2 class="sec">Findings</h2>
 <ul class="findings">
-  <li><span class="fv" data-sev="critical">Degraded (new)</span> — <span class="cat">HTTP responses.</span> 2.3% of responses on <a href="https://revealx.example.com/extrahop/#/metrics/devices/7946be2a04354967a2ff79788087ee24.02bc5bb970bf0000/http-server?from=1&interval_type=HR&until=0"><span class="id">web-app-01</span></a> returning 5xx (baseline 0.3%), sustained across the full hour, with a step change at 14:22.</li>
+  <li><span class="fv" data-sev="critical">Degraded (new)</span> — <span class="cat">HTTP responses.</span> 2.3% of responses on <span class="id">web-app-01</span> returning 5xx (baseline 0.3%), sustained across the full hour, with a step change at 14:22.</li>
   <li><span class="fv" data-sev="medium">Warning (new)</span> — <span class="cat">HTTP latency.</span> Server processing time p95 climbed from 180ms baseline to 1.4 seconds, coincident with the 5xx rise.</li>
-  <li><span class="fv" data-sev="critical">Degraded (new)</span> — <span class="cat">Backend dependency.</span> Outbound TCP to <a href="https://revealx.example.com/extrahop/#/metrics/devices/7946be2a04354967a2ff79788087ee24.7e3c1a04b2a90000/db-server?from=1&interval_type=HR&until=0"><span class="id">db-prod-02</span></a> shows 4× the baseline retransmission-timeout rate, and that database's server processing time p95 has risen from 80ms to 1.2s.</li>
-  <li><span class="fv" data-sev="low">Normal</span> — <span class="cat">TCP transport (local).</span> Round-trip and setup times on <a href="https://revealx.example.com/extrahop/#/metrics/devices/7946be2a04354967a2ff79788087ee24.02bc5bb970bf0000/tcp?from=1&interval_type=HR&until=0"><span class="id">web-app-01</span></a> itself are normal — the issue is not at the network layer on the web tier.</li>
+  <li><span class="fv" data-sev="critical">Degraded (new)</span> — <span class="cat">Backend dependency.</span> Outbound TCP to <span class="id">db-prod-02</span> shows 4× the baseline retransmission-timeout rate, and that database's server processing time p95 has risen from 80ms to 1.2s.</li>
+  <li><span class="fv" data-sev="low">Normal</span> — <span class="cat">TCP transport (local).</span> Round-trip and setup times on <span class="id">web-app-01</span> itself are normal — the issue is not at the network layer on the web tier.</li>
   <li><span class="fv" data-sev="low">Normal</span> — <span class="cat">Request volume.</span> Within 6% of baseline all hour — no silent outage; this is a quality problem, not a quantity one.</li>
 </ul>
 
 <!-- KEY INSIGHT: one prose paragraph — what's happening, what was ruled out, what's still healthy. -->
 <h2 class="sec">Key insight</h2>
-<p class="insight">The 5xx errors on <a href="https://revealx.example.com/extrahop/#/metrics/devices/7946be2a04354967a2ff79788087ee24.02bc5bb970bf0000/http-server?from=1&interval_type=HR&until=0"><span class="id">web-app-01</span></a> are real and impacting users (≈285 affected sessions per hour based on observed request volume), but the cause is one tier down. <a href="https://revealx.example.com/extrahop/#/metrics/devices/7946be2a04354967a2ff79788087ee24.7e3c1a04b2a90000/db-server?from=1&interval_type=HR&until=0"><span class="id">db-prod-02</span></a> became slow at 14:22 and <span class="id">web-app-01</span>'s responses are timing out waiting on it. The web tier's own transport is clean, so the latency isn't introduced in transit. Other web-tier members (<a href="https://revealx.example.com/extrahop/#/metrics/devices/7946be2a04354967a2ff79788087ee24.9f8e7d6c5b4a0000/overview/?from=1&interval_type=HR&until=0"><span class="id">web-app-02</span></a>, <a href="https://revealx.example.com/extrahop/#/metrics/devices/7946be2a04354967a2ff79788087ee24.0a1b2c3d4e5f0000/overview/?from=1&interval_type=HR&until=0"><span class="id">web-app-03</span></a>) are healthy because they load-balance onto <a href="https://revealx.example.com/extrahop/#/metrics/devices/7946be2a04354967a2ff79788087ee24.8a1b2c3d4e5f0000/db-server?from=1&interval_type=HR&until=0"><span class="id">db-prod-01</span></a>, not <span class="id">db-prod-02</span> — which localizes the fault to that one database instance. The web tier doesn't need attention; the database does.</p>
+<p class="insight">The 5xx errors on <span class="id">web-app-01</span> are real and impacting users (≈285 affected sessions per hour based on observed request volume), but the cause is one tier down. <span class="id">db-prod-02</span> became slow at 14:22 and <span class="id">web-app-01</span>'s responses are timing out waiting on it. The web tier's own transport is clean, so the latency isn't introduced in transit. Other web-tier members (<span class="id">web-app-02</span>, <span class="id">web-app-03</span>) are healthy because they load-balance onto <span class="id">db-prod-01</span>, not <span class="id">db-prod-02</span> — which localizes the fault to that one database instance. The web tier doesn't need attention; the database does.</p>
 
 <!-- WHAT TO DO: operator actions outside chat. OMIT this whole section on healthy (Normal) reports. -->
 <h2 class="sec">What to do</h2>
 <ul class="actions">
-  <li>Page the database on-call. Investigate <a href="https://revealx.example.com/extrahop/#/metrics/devices/7946be2a04354967a2ff79788087ee24.7e3c1a04b2a90000/db-server?from=1&interval_type=HR&until=0"><span class="id">db-prod-02</span></a> for long-running queries, lock contention, replication lag, or storage I/O around 14:22 UTC.</li>
-  <li>If <span class="id">db-prod-02</span> must be pulled from rotation, verify <a href="https://revealx.example.com/extrahop/#/metrics/devices/7946be2a04354967a2ff79788087ee24.8a1b2c3d4e5f0000/db-server?from=1&interval_type=HR&until=0"><span class="id">db-prod-01</span></a> capacity headroom first — it would then carry the full web-tier load.</li>
+  <li>Page the database on-call. Investigate <span class="id">db-prod-02</span> for long-running queries, lock contention, replication lag, or storage I/O around 14:22 UTC.</li>
+  <li>If <span class="id">db-prod-02</span> must be pulled from rotation, verify <span class="id">db-prod-01</span> capacity headroom first — it would then carry the full web-tier load.</li>
 </ul>
 
 <!-- DRILL IN FURTHER: paste-back follow-up questions the user can run in chat. -->
 <h2 class="sec">Drill in further</h2>
 <ul class="actions">
-  <li>Run a full health check on <a href="https://revealx.example.com/extrahop/#/metrics/devices/7946be2a04354967a2ff79788087ee24.7e3c1a04b2a90000/overview/?from=1&interval_type=HR&until=0"><span class="id">db-prod-02</span></a></li>
+  <li>Run a full health check on <span class="id">db-prod-02</span></li>
   <li>Show database transactions on <span class="id">db-prod-02</span> with response time &gt; 1 second</li>
 </ul>
 

@@ -222,14 +222,13 @@ and explain why no action is needed.
 
 ### Console deep-links
 
-When the console FQDN is available, link each detection ID, participant device,
+**Do not create device links.** Current tools cannot build them reliably; render device identifiers as plain text in all output formats.
+
+When the console FQDN is available, link each detection ID
 and created investigation in a Detection Set to its exact page in the RevealX
 console, so the analyst can jump from the verdict straight to the evidence.
-Detection and investigation links need only the FQDN; device-participant links
-also need an appliance UUID. Obtain both from `extrahop_get_appliance_metadata`
-— the FQDN from its `display_host` (or `external_hostname`) field, the appliance
-UUID from its `hostname` field (which holds the 32-hex UUID, not a hostname;
-never use `mgmt_ipaddr`). If that tool is unavailable, fall back to a console
+Detection and investigation links need only the FQDN. Obtain it from
+`extrahop_get_appliance_metadata` — its `display_host` (or `external_hostname`) field. If that tool is unavailable, fall back to a console
 URL the user pasted or prior session memory — **never guess.** If no FQDN is
 available, present the Detection Set with plain identifiers; a correct unlinked
 report beats a fabricated link. Skip links on the bulk batch-close ID list and

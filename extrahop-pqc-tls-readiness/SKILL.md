@@ -66,7 +66,7 @@ Read this file, then load only what the step you are on names.
 | `reference/classification.md` | The `PQC-` prefix rule, named TLS groups, SSH algorithm prefixes, classical-weakness thresholds, `~ssl_open` fields and PQC group codepoints | Before classifying any group name, or before Step 5 |
 | `reference/scoping.md` | How to enumerate servers correctly: the CIDR filter, multi-sensor copies, why `device_class` and summing both fail | Before Step 3 |
 | `reference/output.md` | Format precedence, CSV spec, HTML spec, the written narrative | Before emitting anything |
-| `reference/console-urls.md` | Deep-links into the RevealX console | Before emitting a report that names a device or group |
+| `reference/console-urls.md` | Deep-links into the RevealX console | Before emitting a report that names a group |
 | `assets/report-template.html` | Self-contained brandable HTML one-pager (an output asset, not context — read only when emitting HTML) | When emitting HTML |
 
 Regulatory timelines (CNSA 2.0), migration-program planning and board-level framing are
@@ -120,7 +120,7 @@ Step-5 candidate list anyway. Do not reverse them — you will pay for the expen
 ### Step 1 — Orient
 
 Confirm what you are connected to and cache it: firmware, whether this is a console
-fronting several sensors, and the console FQDN + appliance UUID for deep-links
+fronting several sensors, and the console FQDN for deep-links
 (`reference/console-urls.md`). Everything downstream depends on the multi-sensor answer.
 
 ### Step 2 — Estate posture first, and it is nearly free
@@ -477,13 +477,15 @@ clients, or who needs upgrading.
 ### Step 9 — Emit
 
 Per `reference/output.md`: format precedence (user's choice → ask when interactive → CSV),
-CSV and HTML specs, and the narrative. Deep-link devices and groups per
+CSV and HTML specs, and the narrative. Deep-link groups per
 `reference/console-urls.md`. Lead with Step 2's estate posture, then the TLS 1.3
 advertised-PQC/classical-negotiated servers, then the inventory.
 
 ---
 
 ## Guardrails
+
+**Do not create device links.** Current tools cannot build them reliably; render device identifiers as plain text in all output formats.
 
 - **Never fabricate.** No invented device, IP, session count, group name, percentage or
   console URL. No FQDN obtained → emit the report unlinked.

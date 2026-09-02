@@ -1,7 +1,6 @@
 # Console URL Construction
 
-Turn a Detection Set into a launchpad: link each detection, investigation, and
-participant device to its exact page in the RevealX console so the analyst can
+Turn a Detection Set into a launchpad: link each detection and investigation to its exact page in the RevealX console so the analyst can
 jump from the triage conclusion straight to the evidence in one click. The chat
 session is the triage; the console is where the analyst takes it forward.
 
@@ -20,9 +19,6 @@ Build a link whenever a Detection Set names a navigable target:
 - **Detections** — link each detection ID (`#<id>`) in the `Detections:` line to
   its detection-detail page. This is the highest-value link: it lands the
   analyst on the exact card they are dispositioning.
-- **Participants** — link an offender/victim **device** identifier to its device
-  overview page (same pattern as the health-check skill). IP-only participants
-  with no device OID are not linkable; leave them as plain text.
 - **Investigations** — once `extrahop_create_investigation` returns an
   investigation ID, link that ID to the investigation page so the analyst can
   open the freshly created case.
@@ -42,36 +38,27 @@ Skip links in:
 
 ---
 
-## Prerequisites: FQDN and appliance UUID
+## Prerequisite: FQDN
 
-Every console URL needs the console **FQDN**; device URLs additionally need an
-**appliance UUID**. Detection and investigation URLs need only the FQDN.
+Every console URL needs the console **FQDN**.
 
 - **Console FQDN** (e.g. `tenant.cloud.extrahop.com`) — the customer's
   RevealX hostname. Forms the URL base `https://<fqdn>/extrahop/#/`.
-- **Appliance UUID** — a 32-character hex string identifying the appliance
-  hosting the device data. Required only for device-participant URLs, as the
-  `<appliance_uuid>.<discovery_id>` composite.
 
-### Acquiring the FQDN and appliance UUID
+### Acquiring the FQDN
 
-`extrahop_get_appliance_metadata` returns both pieces. Its field names are
-counter-intuitive, so read them carefully:
+`extrahop_get_appliance_metadata` returns the console FQDN:
 
 | Field | Holds | Use for |
 |---|---|---|
 | `display_host` | The console FQDN (e.g. `tenant.cloud.extrahop.com`) | **FQDN** — primary source |
 | `external_hostname` | Usually the same FQDN | **FQDN** — fallback if `display_host` is empty |
-| `hostname` | The 32-hex **appliance UUID** (NOT a hostname) | **Appliance UUID** |
 | `mgmt_ipaddr` | Management IP | Never use for URLs |
 
 1. **Call `extrahop_get_appliance_metadata`.** Read the FQDN from `display_host`
-   (fall back to `external_hostname`) and the appliance UUID from `hostname`.
-   This single call yields both. Cache them for the session.
+   (fall back to `external_hostname`). Cache it for the session.
 2. **(Fallback) Parse a console URL the user already pasted** in this
-   conversation, matching `https://<fqdn>/extrahop/#/...`. A pasted device URL
-   of the form `/metrics/devices/<32hex>.<16hex>/` also yields the appliance
-   UUID (the 32-hex prefix). Use this only if the tool is unavailable.
+   conversation, matching `https://<fqdn>/extrahop/#/...`. Use this only if the tool is unavailable.
 3. **Prior session memory**, if available and the user has used this skill
    before in the same environment.
 
@@ -79,13 +66,9 @@ counter-intuitive, so read them carefully:
    construct any links.** Present the Detection Set with plain `#<id>` and
    `name (device/<OID>)` text. Do not guess the hostname.
 
-If you have the FQDN but not the appliance UUID, you can still build detection
-and investigation links (they need only the FQDN) and skip the device-overview
-links rather than fabricating the UUID. Don't derail a triage to chase the UUID.
-
 ### Caching
 
-Acquire each piece **once per session**, then cache and reuse for every link in
+Acquire the FQDN **once per session**, then cache and reuse for every link in
 every Detection Set. A new session re-acquires — that's fine.
 
 ### Never fabricate
@@ -93,9 +76,7 @@ every Detection Set. A new session re-acquires — that's fine.
 - Never invent the FQDN. A plausible-looking domain (`acme.extrahop.com`) can
   send the analyst to an unrelated tenant or a 404, and in a shared-screen
   review a wrong FQDN can leak another customer's existence. No FQDN -> no links.
-- Never invent the appliance UUID; the 32-hex value isn't guessable.
-- Never confuse the `hostname` field (the appliance UUID) with the FQDN, and
-  never substitute the management IP (`mgmt_ipaddr`) for the FQDN.
+- Never substitute the management IP (`mgmt_ipaddr`) for the FQDN.
 
 ---
 
@@ -130,35 +111,14 @@ Example (investigation `102`):
 https://tenant.cloud.extrahop.com/extrahop/#/detections/investigations/102
 ```
 
-### Device participant page (overview)
-
-Reuses the device-URL pattern from the `extrahop-health-check` skill. The
-composite device identifier is `<appliance_uuid>.<discovery_id>`:
-
-```
-https://<fqdn>/extrahop/#/metrics/devices/<appliance_uuid>.<discovery_id>/overview/
-```
-
-- `appliance_uuid` — 32 hex chars, environment-constant (see Prerequisites).
-- `discovery_id` — 16 hex chars, returned by `extrahop_get_device` as
-  `discovery_id` (or `extrahop_id`; both carry the same value).
-
-A time window is optional on triage device links — unlike the health-check
-skill, a detection already pins the analyst to the relevant moment. Omit the
-`?from=...&interval_type=...&until=0` params unless you want to scope the device
-page to the detection's window, in which case use the same time-parameter
-mapping documented in the health-check `console-urls.md`.
-
 ---
 
 ## Formatting in the report
 
 Wrap the identifier in a Markdown link, keeping the identifier readable. In the
-Detection Set the detection ID and participant identifiers are the natural link
-anchors.
+Detection Set the detection and investigation IDs are the natural link anchors.
 
 - Detection ID: `[#412316861591](https://.../detections/detail/412316861591)`
-- Participant device: `[web-prod-01](https://.../metrics/devices/<uuid>.<did>/overview/) (device/12345)`
 - Investigation: `[#102](https://.../detections/investigations/102)`
 
 Link the **first occurrence** of each identifier in a given Detection Set.
@@ -168,10 +128,8 @@ Repeat occurrences stay plain.
 
 ## Examples
 
-These use FQDN `tenant.cloud.extrahop.com` and (for the device link)
-appliance UUID `7946be2a04354967a2ff79788087ee24`, both from
-`extrahop_get_appliance_metadata` (FQDN from `display_host`, UUID from
-`hostname`).
+These use FQDN `tenant.cloud.extrahop.com` from
+`extrahop_get_appliance_metadata` (`display_host`).
 
 ### Detection IDs in a Detection Set
 
@@ -182,7 +140,7 @@ appliance UUID `7946be2a04354967a2ff79788087ee24`, both from
 ### Participant device
 
 ```markdown
-  - Offender: [vuln-scanner-01](https://tenant.cloud.extrahop.com/extrahop/#/metrics/devices/7946be2a04354967a2ff79788087ee24.02bc5bb970bf0000/overview/) (device/90211)
+  - Offender: vuln-scanner-01 (device/90211)
 ```
 
 ### Newly created investigation
@@ -197,10 +155,10 @@ Investigation [#102](https://tenant.cloud.extrahop.com/extrahop/#/detections/inv
 
 ## Safeguards
 
-- **Never fabricate.** No guessing the FQDN, appliance UUID, or discovery_id. No
+- **Never fabricate.** No guessing the FQDN. No
   FQDN available -> emit the report unlinked. Better unlinked than wrong-linked.
   From `extrahop_get_appliance_metadata`: FQDN is `display_host`/`external_hostname`,
-  appliance UUID is `hostname`, never `mgmt_ipaddr`.
+  never `mgmt_ipaddr`.
 - **Don't link the bulk batch-close list.** Linking dozens of IDs is noise; link
   only excluded items and a representative.
 - **Don't substitute links for explanation.** Each Detection Set must read

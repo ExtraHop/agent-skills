@@ -72,7 +72,7 @@ Omit **What to do** entirely on healthy reports. Cap each section at 3–4 items
 ### Typography
 
 - **Identifiers in backticks.** Device names, hostnames, IPs, metric names. The single most important typography rule.
-- **Link the first occurrence** of each device or device group identifier to its console page at the assessment window — `` [`web-app-01`](https://...) ``, backticks outside the link. See `console-urls.md` for the URL syntax. Re-link in *What to do* and *Drill in further* even if already linked in the body, since those sections are skim-points. Skip device-level links when the appliance UUID is unknown (device-group links need only the FQDN) — never fabricate URLs.
+- **Link the first occurrence** of each device group identifier to its console page at the assessment window — `` [`HTTP Servers`](https://...) ``, backticks outside the link. See `console-urls.md` for the URL syntax. Re-link in *What to do* and *Drill in further* even if already linked in the body, since those sections are skim-points. Never fabricate URLs.
 - **Magnitudes:** `1.4s` not `1400ms` once ≥ 1s. `142 GB` not bytes. `2.3%` not `0.023`.
 - **Time format:** relative + local TZ ("Last 24 hours"). UTC anchor only in YAML.
 - **No fake alignment.** Don't pad with whitespace; Markdown can't right-justify.
@@ -87,14 +87,12 @@ One screen of chat. Title + verdict line + problem sentence + 4–6 findings + 3
 
 ### Example 1: Device check with multi-tier root cause (Degraded, new)
 
-In this example, the hostname `revealx.example.com` and the appliance UUID `7946be2a04354967a2ff79788087ee24` were both obtained from `extrahop_get_appliance_metadata` (FQDN from `display_host`, UUID from `hostname`). The assessment window is 1 hour, mapping to `from=1&interval_type=HR&until=0`.
-
 ```markdown
 ## Health Check: web-app-01
 
 **Degraded (new)** · Last 1 hour
 
-HTTP 5xx errors are elevated on [`web-app-01`](https://revealx.example.com/extrahop/#/metrics/devices/7946be2a04354967a2ff79788087ee24.02bc5bb970bf0000/overview/?from=1&interval_type=HR&until=0), but the root cause is database latency on [`db-prod-02`](https://revealx.example.com/extrahop/#/metrics/devices/7946be2a04354967a2ff79788087ee24.7e3c1a04b2a90000/db-server?from=1&interval_type=HR&until=0) — not the web tier itself.
+HTTP 5xx errors are elevated on `web-app-01`, but the root cause is database latency on `db-prod-02` — not the web tier itself.
 
 **Findings**
 
@@ -107,16 +105,14 @@ HTTP 5xx errors are elevated on [`web-app-01`](https://revealx.example.com/extra
 
 **What to do**
 
-- Page database on-call. Investigate [`db-prod-02`](https://revealx.example.com/extrahop/#/metrics/devices/7946be2a04354967a2ff79788087ee24.7e3c1a04b2a90000/db-server?from=1&interval_type=HR&until=0) for long-running queries, replication lag, or storage I/O around 14:22 UTC.
+- Page database on-call. Investigate `db-prod-02` for long-running queries, replication lag, or storage I/O around 14:22 UTC.
 - If `db-prod-02` must be removed from rotation, verify `db-prod-01` capacity headroom first.
 
 **Drill in further**
 
-- Run a full health check on [`db-prod-02`](https://revealx.example.com/extrahop/#/metrics/devices/7946be2a04354967a2ff79788087ee24.7e3c1a04b2a90000/db-server?from=1&interval_type=HR&until=0)
+- Run a full health check on `db-prod-02`
 - Show database transactions on `db-prod-02` with response time > 1 second
 ```
-
-Note: the first occurrence of `web-app-01` and `db-prod-02` — both in the problem statement — is linked; later body mentions stay plain. `db-prod-02` is re-linked in *What to do* and at its first *Drill in further* mention since those sections are skim-points. The `db-prod-02` links point at the `db-server` protocol page because that's the protocol the finding implicates; `web-app-01` points at the overview because the finding spans HTTP responses, HTTP latency, and outbound TCP — no single protocol slug captures it.
 
 ### Example 2: Fleet check with bimodal distribution (Degraded, new)
 

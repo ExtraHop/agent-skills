@@ -155,12 +155,13 @@
       "id": 12,
       "name": "detection-set-deep-links",
       "prompt": "Triage the recommended detections. Our console is https://soc.example.extrahop.com/extrahop/#/detections",
-      "expected_output": "The FQDN is available (from extrahop_get_appliance_metadata's display_host/external_hostname field, or parsed from the pasted console URL as a fallback). Detection Sets link each detection ID to its detection-detail page (https://soc.example.extrahop.com/extrahop/#/detections/detail/<id>) and link participant devices to their overview pages when an appliance UUID is also available (from extrahop_get_appliance_metadata's hostname field). The bulk batch-close ID list stays plain text; only excluded items are linked. URLs are never fabricated.",
+      "expected_output": "The FQDN is available (from extrahop_get_appliance_metadata's display_host/external_hostname field, or parsed from the pasted console URL as a fallback). Detection Sets link each detection ID to its detection-detail page (https://soc.example.extrahop.com/extrahop/#/detections/detail/<id>). Participant devices remain unlinked. The bulk batch-close ID list stays plain text; only excluded items are linked. URLs are never fabricated.",
       "assertions": [
         {"text": "Obtains the console FQDN (from extrahop_get_appliance_metadata display_host/external_hostname, or the pasted URL) and uses it to build links"},
         {"text": "Links detection IDs in the Detection Set to /extrahop/#/detections/detail/<id>"},
         {"text": "Does not link the bulk batch-close ID list (links only excluded items)"},
-        {"text": "Never fabricates a hostname, appliance UUID, or URL; does not use the hostname field as the FQDN or mgmt_ipaddr as the FQDN; if a piece is missing, leaves that identifier as plain text"}
+        {"text": "Never fabricates a hostname or URL; does not use the hostname field as the FQDN or mgmt_ipaddr as the FQDN; if a piece is missing, leaves that identifier as plain text"},
+        {"text": "Keeps every device participant unlinked"}
       ],
       "files": []
     },
@@ -292,6 +293,19 @@
         {"text": "Corroborates the volumetric shape with search_metric_catalog -> execute_metric_query before pulling raw records"},
         {"text": "Uses a narrow, hypothesis-testing search_records query (compound participant+attribute filter, sort by time, small limit) rather than a broad participant dump"},
         {"text": "Pulls pcap only for the specific transactions needing packet proof, scoped to a single conversation, within recent/on-disk windows"}
+      ],
+      "files": []
+    },
+    {
+      "id": 23,
+      "name": "participant-links-deferred-despite-pasted-url",
+      "prompt": "This device URL opens correctly for dc-01: https://tenant.cloud.extrahop.com/extrahop/#/metrics/devices/a1b2c3d4e5f6478899aabbccddeeff00.0123456789abcdef/kerberos-server?delta_type&from=1&interval_type=DAY&until=0. Triage the current detections and link participant devices where possible.",
+      "expected_output": "Completes triage and keeps all device participants unlinked despite the pasted device URL. Uses its host for detection and created investigation links. Briefly explains that reliable device links are not currently supported.",
+      "assertions": [
+        {"text": "Completes triage and links detection and created investigation IDs using the supplied host"},
+        {"text": "Keeps every device participant unlinked, including dc-01"},
+        {"text": "Does not reuse the pasted device URL or its IDs to construct device links"},
+        {"text": "Briefly explains the device-link limitation"}
       ],
       "files": []
     }

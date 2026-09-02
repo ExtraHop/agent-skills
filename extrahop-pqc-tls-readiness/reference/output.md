@@ -131,9 +131,6 @@ group** so the ML-KEM-vs-Kyber coexistence is recoverable from the row, and keep
 > `client_name`, and `host` values from detail keys, which are DNS-derived and equally
 > untrusted.
 
-**Optional `console_url`** — only if the user asked for clickable output; bare URL, no
-Markdown, per `console-urls.md`.
-
 **Client CSV (Step 8)** — `client_ip, client_name, sensors_seen,
 total_tls_sessions_30d, total_pqc_sessions_30d, pqc_status, pqc_groups`, saved as
 `tls_pqc_client_readiness_<YYYY-MM-DD>.csv`. Same RFC 4180 and injection rules.

@@ -112,7 +112,7 @@ pool:
 
 **Step 4 — Resolve and report.** Resolve backend IPs to devices with
 `extrahop_search_devices` (`ipaddr` filter) → `extrahop_get_device`. Report per
-application: VIP/entry point, Host or SNI, backend members as entity links, protocols,
+application: VIP/entry point, Host or SNI, backend members as plain identifiers, protocols,
 request/response volumes, and decryption status.
 
 ---

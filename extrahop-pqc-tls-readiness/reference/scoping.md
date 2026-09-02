@@ -175,8 +175,7 @@ Two free substitutes:
 **Verified shortcut:** all 152 multi-OID internal MAC groups were exactly size 2 with
 `node_id` pattern `(1, 2)`, and no MAC group had differing IPs. So: **group by `macaddr`;
 where members differ only in `OID >> 32`, they are per-sensor copies of one host.**
-Reserve `get_device` for the ambiguous residue — and when you do call it, **cache
-`discovery_id` from the same response** for console deep-links rather than fetching twice.
+Reserve `get_device` for the ambiguous residue.
 
 **Never dedupe on IP.** DHCP, NAT and VIP failover recycle addresses within a 30-day
 window, so IP-merging fuses genuinely different hosts.

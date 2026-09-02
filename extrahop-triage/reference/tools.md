@@ -66,7 +66,7 @@ RevealX UI, but must never claim to have created or applied one.
 | `extrahop_search_devices` | Find devices by vendor, name (`~` for partial), role, IP/CIDR, tag, criticality, etc. |
 | `extrahop_search_devicegroups` / `extrahop_list_devices_in_devicegroup` | Resolve and enumerate device groups. |
 | `extrahop_search_devicetags` / `extrahop_list_devicetags_for_device` | Inspect tags. |
-| `extrahop_get_appliance_metadata` | Console FQDN and appliance UUID for deep-links: FQDN from `display_host`/`external_hostname`, appliance UUID from `hostname` (32-hex; not `mgmt_ipaddr`). |
+| `extrahop_get_appliance_metadata` | Console FQDN for deep-links: FQDN from `display_host`/`external_hostname`. |
 
 ## Record and packet tools
 

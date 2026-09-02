@@ -60,11 +60,10 @@ directly when the analyst clicks Close or Create Investigation.
 
 When the console FQDN is available, wrap the natural link anchors in Markdown
 links to the RevealX console (detection IDs -> detection-detail page,
-participant devices -> device overview, created investigation IDs ->
+created investigation IDs ->
 investigation page). The full id stays in the visible label — adding a link
 never abbreviates it, e.g.
-`[#4294975901](https://.../detections/detail/4294975901) DCSync Activity` or
-`[web-prod-01](https://.../metrics/devices/<uuid>.<did>/overview/) (device/12345)`.
+`[#4294975901](https://.../detections/detail/4294975901) DCSync Activity`.
 Link the first occurrence of each identifier per Detection Set. If no FQDN is
 available, leave identifiers as plain text — never fabricate a URL. Do not link
 the bulk batch-close ID list (link only excluded items). Full syntax and
