@@ -1,0 +1,408 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{REPORT_TITLE}}</title>
+
+<!--
+  ============================================================================
+  BRANDABLE ONE-PAGE REPORT TEMPLATE
+  ============================================================================
+  A self-contained, dependency-free HTML report you can (a) fill with data to
+  generate a report, and (b) re-skin with your own company branding.
+
+  It is derived from a vendor one-pager design system with all vendor-specific
+  branding removed. Everything brandable lives in the :root variables and the
+  two clearly-marked LOGO / FOOTER regions below — you should not need to touch
+  the structural CSS or the body markup to rebrand.
+
+  ---------------------------------------------------------------------------
+  HOW TO BRAND IT (5 minutes)
+  ---------------------------------------------------------------------------
+  1. Colors      — edit the --brand-* variables in :root. Set --brand-1 and
+                   --brand-2 to your primary two colors (they form the header
+                   gradient); set --accent to a single highlight color and use
+                   it sparingly.
+  2. Font        — the template uses the system UI font (no network request). To
+                   brand with a specific typeface, embed it as a base64
+                   @font-face rule and update the --font variable; keep a system
+                   fallback in the stack. Never add a remote font <link> — it
+                   breaks the self-contained/offline guarantee.
+  3. Logo        — in the ".brandmark" element, paste your inline <svg> or an
+                   <img src="data:image/png;base64,...">. Inline/base64 keeps
+                   the file self-contained (no external requests). Remove the
+                   placeholder text.
+  4. Footer      — set your company name / confidentiality label in <footer>.
+  5. Placeholders— replace every double-brace token with real content (listed
+                   below, deliberately without their braces).
+
+  ---------------------------------------------------------------------------
+  HOW TO GENERATE A REPORT FROM IT
+  ---------------------------------------------------------------------------
+  Two-stage fill, so per-row values stay distinct:
+    STAGE 1 — render REPEATED fragments independently: build one <tr> string
+      per server (shape shown in the <tbody> comment) and one <li> string per
+      finding, inlining ALREADY-ESCAPED values directly. Concatenate them into
+      a rows-string and a findings-string.
+    STAGE 2 — run ONE top-level substitution over the template, replacing
+      the ROWS token with the rows-string, the NARRATIVE_POINTS token with the
+      findings-string, and every scalar token below with its value. Never
+      duplicate a generic placeholder row and then substitute — every copy
+      would receive identical values. Then STRIP THIS COMMENT.
+  All content is plain HTML — no build step.
+
+  Placeholder tokens are listed below WITHOUT their double-brace spelling, so
+  that the single global replace of STAGE 2 cannot fill them inside this
+  comment. Each name below is used in the document as NAME wrapped in double
+  braces. STRIP THIS ENTIRE COMMENT as the final step of STAGE 2.
+
+    REPORT_TITLE       Document <title> and header H1
+    REPORT_SUBTITLE    One-line description under the title
+    REPORT_DATE        Generation date, e.g. 2026-07-13 (appears twice)
+    REPORT_WINDOW      Time window covered, e.g. "Last 30 days"
+    STAT_1..4_NUM      Summary-strip numbers (fixed set of 4 tiles)
+    STAT_1..4_LABEL    Summary-strip labels
+    TABLE_HEADING      Heading above the per-device table
+    COL_1..COL_7       Table column headers (7 columns)
+    ROWS               All pre-rendered <tr> fragments, concatenated (STAGE 1).
+                       Column 6 of each fragment is the status pill:
+                       a <span> of class "pill yes" or "pill no" — per row.
+    NARRATIVE_CALLOUT  Callout box text
+    NARRATIVE_INTRO    Findings intro paragraph
+    NARRATIVE_POINTS   All pre-rendered <li> fragments, concatenated (STAGE 1)
+    COMPANY_NAME       Footer company name (appears twice)
+    CONFIDENTIALITY    e.g. "Confidential"
+
+  The table ships with 7 columns. The column ORDER, matching both the <thead>
+  and the <tbody> fragment shape, is:
+    1 device_name  2 ip_address  3 total sessions  4 PQC sessions
+    5 TLS versions  6 pqc_status (pill)  7 unique PQC clients
+  Add or remove <th>/<td> pairs if your data needs a different count, keeping
+  headers and row cells in sync.
+
+  SECURITY: if you populate this programmatically from machine data (device
+  names, hostnames, user input), HTML-escape every interpolated value
+  (& < > ") so a value like "<script>" renders as text, not markup. Escaping
+  does NOT neutralize the comment terminator or the double-brace token
+  spelling — also strip or encode both in every interpolated value, or a
+  device name containing either can break out of a comment or be re-read as a
+  placeholder.
+
+  Prints cleanly to PDF (Letter landscape — see the @page rule; the 7-column
+  table needs the width) via Chrome "Save as PDF", Weasyprint, Playwright, or
+  any HTML-to-PDF tool.
+  ============================================================================
+-->
+
+<!-- Self-contained: NO remote requests. Uses the OS's native UI font so the file
+     renders identically offline and when printed to PDF. To brand with a specific
+     typeface, embed it here as a base64 @font-face rule (which keeps the file
+     self-contained) and update --font below — never add a remote font <link>. -->
+
+<style>
+  :root {
+    /* ---- BRAND TOKENS — edit these to rebrand ---- */
+    --brand-1: #1f2a63;              /* primary color (header gradient start) */
+    --brand-2: #542854;              /* secondary color (header gradient end) */
+    --accent:  #0aa2ef;              /* single highlight color — use sparingly */
+    --ink:     #1a1a1a;              /* body text */
+    --muted:   #6b6c70;             /* secondary text */
+    --line:    #e2e3e6;             /* borders / rules */
+    --panel:   #f6f7f9;            /* subtle panel background */
+    --ok:      #1a7f4b;              /* positive / "observed" state */
+    --warn:    #b4690e;             /* attention state */
+    --bad:     #b3261e;             /* negative / "declined" state */
+    --pill-no-fg: #55565a;        /* pill text: darker than --muted for WCAG AA
+                                      contrast at the pill's small font size */
+    --font:    system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --gradient: linear-gradient(135deg, var(--brand-1), var(--brand-2));
+    /* ---------------------------------------------- */
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: var(--font);
+    color: var(--ink);
+    font-size: 14px;
+    line-height: 1.5;
+    background: #fff;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .page { max-width: 11in; margin: 0 auto; padding: 0 0 1in; }
+
+  /* ---- Header ---- */
+  header.masthead {
+    background: var(--gradient);
+    color: #fff;
+    padding: 2rem 2.25rem 1.75rem;
+  }
+  .brandmark {
+    /* BRAND: replace the text below with your inline <svg> or <img> logo. */
+    font-weight: 900;
+    letter-spacing: .04em;
+    font-size: 1.05rem;
+    min-height: 1.4rem;
+    margin-bottom: 1.25rem;
+    opacity: .95;
+  }
+  header.masthead h1 {
+    font-weight: 900;
+    font-size: 1.9rem;
+    line-height: 1.15;
+    margin: 0 0 .35rem;
+    letter-spacing: -.01em;
+  }
+  header.masthead .subtitle { font-size: 1rem; opacity: .9; margin: 0; }
+  header.masthead .meta {
+    margin-top: 1rem; font-size: .8rem; opacity: .85;
+    display: flex; gap: 1.5rem; flex-wrap: wrap;
+  }
+
+  main { padding: 1.75rem 2.25rem 0; }
+  section { margin-bottom: 1.75rem; }
+  h2 {
+    font-size: 1.15rem; font-weight: 700; margin: 0 0 .75rem;
+    padding-bottom: .35rem; border-bottom: 2px solid var(--line);
+  }
+
+  /* ---- Summary stat strip ---- */
+  .strip { display: flex; gap: .9rem; flex-wrap: wrap; }
+  .stat {
+    flex: 1 1 0; min-width: 120px;
+    border: 1px solid var(--line); border-radius: 10px;
+    padding: .85rem 1rem; background: var(--panel);
+  }
+  .stat .num { font-size: 1.6rem; font-weight: 900; line-height: 1; }
+  .stat .lbl { font-size: .72rem; text-transform: uppercase;
+               letter-spacing: .05em; color: var(--muted); margin-top: .4rem; }
+  .stat.accent { border-color: var(--accent); }
+  .stat.accent .num { color: var(--accent); }
+
+  /* ---- Data table ---- */
+  /* table-layout:fixed keeps the table within its container's width no matter
+     how many columns; without it, many columns overflow and the table renders
+     wider than the header/summary/findings sections. */
+  table { width: 100%; border-collapse: collapse; font-size: 12.5px; table-layout: fixed; }
+
+  /* Accessible table name for screen readers; the visible <h2> already shows it,
+     so keep it out of the visual/print flow rather than duplicating the heading. */
+  .sr-caption { position: absolute; width: 1px; height: 1px; overflow: hidden;
+                clip: rect(0 0 0 0); white-space: nowrap; }
+  thead th {
+    text-align: left; background: var(--brand-1); color: #fff;
+    padding: .5rem .6rem; font-weight: 600;
+  }
+  tbody td { padding: .45rem .6rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+  tbody tr:nth-child(even) { background: var(--panel); }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  /* let long device names / hostnames wrap instead of forcing the table wider */
+  th, td { overflow-wrap: anywhere; word-break: break-word; }
+  /* column widths under table-layout:fixed — give text columns room, keep
+     numeric columns tight. Adjust to your own column set. */
+  /* Col 1 is the unbounded free-text name and needs the width; col 2 is a
+     fixed-length IP and does not. Col 6 holds a nowrap status pill whose widest
+     label ("Observed (ML-KEM + Kyber-draft)") sets the floor — give it enough
+     width that the pill never overruns into col 7, or the two collide and both
+     become unreadable (the failure this column set is tuned to avoid). */
+  thead th:nth-child(1) { width: 20%; }
+  thead th:nth-child(2) { width: 11%; }
+  thead th:nth-child(3), thead th:nth-child(4) { width: 10%; }
+  thead th:nth-child(5) { width: 13%; }
+  thead th:nth-child(6) { width: 26%; }  /* status pill: must not wrap — widest label sets this */
+  thead th:nth-child(7) { width: 10%; }
+
+  /* State pills — semantic, not vendor-specific */
+  /* nowrap is required: without it a two-word status wraps inside the pill and
+     the 999px radius renders it as a blob rather than a badge. */
+  .pill { display: inline-block; padding: .05rem .5rem; border-radius: 999px;
+          font-size: .72rem; font-weight: 700; white-space: nowrap; }
+  /* Static tint first: WeasyPrint does not support color-mix() and would drop
+     the declaration, leaving the positive state with no background. */
+  .pill.yes { background: #e7f3ec; color: var(--ok); }
+  .pill.yes { background: color-mix(in srgb, var(--ok) 15%, #fff); }
+  .pill.no  { background: var(--panel); color: var(--pill-no-fg);
+              border: 1px solid var(--line); }
+  .pill.warn { background: #fdecea; color: var(--bad); }
+
+  /* Non-numeric value in an otherwise numeric column (e.g. "unavailable") */
+  td.na { text-align: right; color: var(--muted); font-style: italic; }
+
+  /* ---- Narrative ---- */
+  .narrative p { margin: 0 0 .7rem; }
+  .narrative ul { margin: 0 0 .7rem 1.1rem; padding: 0; }
+  .callout {
+    border-left: 3px solid var(--accent);
+    background: var(--panel);
+    padding: .7rem .9rem; border-radius: 0 8px 8px 0; margin: 0 0 .9rem;
+    font-size: 13px;
+  }
+
+  footer {
+    margin-top: 2rem; padding: 1rem 2.25rem;
+    border-top: 1px solid var(--line);
+    color: var(--muted); font-size: .72rem;
+    display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+  }
+
+  /* ---- Print ---- */
+  /* Landscape: the 7-column inventory (esp. the nowrap status pill in col 6)
+     does not fit Letter portrait without the pill overrunning col 7. */
+  @page { size: Letter landscape; margin: 0.5in; }
+  @media print {
+    .page { max-width: none; padding: 0; }
+    header.masthead { padding: 1.25rem 1.5rem; }
+    main { padding: 1.25rem 1.5rem 0; }
+    section, tr, .stat { break-inside: avoid; }
+    thead { display: table-header-group; }  /* repeat header on each printed page */
+  }
+</style>
+</head>
+
+<body>
+<div class="page">
+
+  <!-- ============ HEADER ============ -->
+  <header class="masthead">
+    <!-- BRAND: LOGO REGION — paste inline <svg> or <img src="data:..."> here. -->
+    <div class="brandmark">{{COMPANY_NAME}}</div>
+
+    <h1>{{REPORT_TITLE}}</h1>
+    <p class="subtitle">{{REPORT_SUBTITLE}}</p>
+    <div class="meta">
+      <span>Generated {{REPORT_DATE}}</span>
+      <span>Window: {{REPORT_WINDOW}}</span>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- ============ SUMMARY STRIP ============ -->
+    <section>
+      <h2>Summary</h2>
+      <div class="strip">
+        <!-- Fixed set of 4 uniquely-numbered tiles (STAT_1..STAT_4) — fill in
+             the single STAGE-2 pass; use .stat.accent for the key number. To
+             change the tile count, add/remove whole .stat divs with NEW unique
+             numbers (STAT_5...) — never duplicate an unfilled numbered tile. -->
+        <div class="stat accent">
+          <div class="num">{{STAT_1_NUM}}</div>
+          <div class="lbl">{{STAT_1_LABEL}}</div>
+        </div>
+        <div class="stat">
+          <div class="num">{{STAT_2_NUM}}</div>
+          <div class="lbl">{{STAT_2_LABEL}}</div>
+        </div>
+        <div class="stat">
+          <div class="num">{{STAT_3_NUM}}</div>
+          <div class="lbl">{{STAT_3_LABEL}}</div>
+        </div>
+        <div class="stat">
+          <div class="num">{{STAT_4_NUM}}</div>
+          <div class="lbl">{{STAT_4_LABEL}}</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ DATA TABLE ============ -->
+    <section>
+      <h2>{{TABLE_HEADING}}</h2>
+      <table>
+        <caption class="sr-caption">{{TABLE_HEADING}}</caption>
+        <thead>
+          <tr>
+            <th scope="col">{{COL_1}}</th>
+            <th scope="col">{{COL_2}}</th>
+            <th scope="col" class="num">{{COL_3}}</th>
+            <th scope="col" class="num">{{COL_4}}</th>
+            <th scope="col">{{COL_5}}</th>
+            <th scope="col">{{COL_6}}</th>
+            <th scope="col" class="num">{{COL_7}}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- The ROWS token below is replaced ONCE, in the same single
+               top-level substitution pass as every other token, with the
+               concatenation of independently pre-rendered row fragments.
+               Build each fragment separately (one per server), inlining that
+               server's ALREADY-ESCAPED values into this shape:
+
+               <tr>
+                 <td>device_name</td>
+                 <td>ip_address</td>
+                 <td class="num">total_tls_sessions</td>
+                 <td class="num">total_pqc_sessions</td>
+                 <td>tls_versions</td>
+                 <td><span class="pill CLASS">LABEL</span></td>
+                 <td class="num">unique_clients_pqc_observed</td>
+               </tr>
+
+               Column 6 is the status pill: THREE classes, FOUR states.
+                 class "pill yes"  -> Observed (ML-KEM)      standardized, FIPS 203
+                 class "pill warn" -> Observed (pre-standard Kyber)
+                 class "pill warn" -> Advertised PQC, classical negotiated
+                 class "pill no"   -> None observed
+               Pre-standard Kyber is a positive WITH an open work item — its
+               codepoint is being retired — so it must NOT render as "yes".
+               post_quantum_kex counts it identically to ML-KEM, so the split
+               comes from the key_agreement group names, not the counter. If
+               those came back empty, label the row "Observed (variant
+               unresolved)" as "warn" rather than guessing a variant.
+               The Step-5 state is "advertised PQC, classical negotiated" — NOT
+               "declined": supported_groups is an advertisement, not a key
+               share (RFC 8446 4.2.8). A host can hold MORE THAN ONE state at
+               once; the pill shows the highest-confidence positive. NOTE this
+               reduced 7-column view has a version cell (col 5) but NO group
+               cell, so on its own it cannot show a secondary key-agreement
+               state — the full record (the pqc_status booleans + pqc_groups)
+               lives in the CSV, and if the HTML itself must show the
+               ML-KEM-vs-Kyber split, add a pqc_groups column and matching
+               header (see reference/output.md). The pill must never be the
+               only place any state is recorded.
+               Never leave a hard-coded positive class on a negative row.
+
+               Column 7 is numeric. If a count is unbounded/unavailable, use
+               class "na" on that cell instead of class "num" so prose is not
+               right-aligned in a numeric column.
+
+               The pill class MUST be set per row — it drives the pill color and
+               it is what a skimming reader actually reads. Do NOT duplicate a
+               generic placeholder row and then substitute: every copy would
+               receive identical values. Render fragments first, then replace
+               the ROWS token once. (This comment deliberately avoids the
+               double-brace spelling so a global replace can't fill it.)
+
+               STRIP THIS COMMENT, and the header one, as the last emit step —
+               they ship to the customer otherwise. -->
+          {{ROWS}}
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ============ NARRATIVE / FINDINGS ============ -->
+    <section class="narrative">
+      <h2>Findings</h2>
+      <div class="callout">{{NARRATIVE_CALLOUT}}</div>
+      <p>{{NARRATIVE_INTRO}}</p>
+      <ul>
+        <!-- The NARRATIVE_POINTS token below = concatenation of pre-rendered
+             <li>escaped finding text</li> fragments, one per finding,
+             built in STAGE 1 and substituted once in STAGE 2. -->
+        {{NARRATIVE_POINTS}}
+      </ul>
+    </section>
+
+  </main>
+
+  <!-- ============ FOOTER ============ -->
+  <footer>
+    <span>{{COMPANY_NAME}}</span>
+    <span>{{CONFIDENTIALITY}} · {{REPORT_DATE}}</span>
+  </footer>
+
+</div>
+</body>
+</html>
