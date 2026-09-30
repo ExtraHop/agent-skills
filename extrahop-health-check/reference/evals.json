@@ -1,6 +1,6 @@
 {
   "skill_name": "extrahop-health-check",
-  "description": "Test cases covering scope inference, error reclassification, evidence sufficiency, multi-tier correlation, output formatting, freshness gating, volume-drop detection, workload inference, and sensor deployment caveats. Assertions target the current output spec in reference/output-templates.md: Default mode for interactive checks (H2 title, bold verdict line with middle-dot separator, verdict-first findings bullets, backticked identifiers, console deep-links, no HSI/confidence/YAML in the body), Detailed mode only when explicitly triggered (tagging, scheduled, audit, 'full report'), and Quick-look mode for 'tldr'-style asks. Each prompt represents a realistic question a customer might ask their AI agent in an environment with ExtraHop MCP connected.",
+  "description": "Test cases covering scope inference, error reclassification, evidence sufficiency, multi-tier correlation, output formatting, freshness gating, volume-drop detection, workload inference, and sensor deployment caveats. Assertions target the current output spec in reference/output-templates.md: Default mode for interactive checks (H2 title, bold verdict line with middle-dot separator, verdict-first findings bullets, backticked identifiers, no HSI/confidence/YAML in the body), Detailed mode only when explicitly triggered (tagging, scheduled, audit, 'full report'), and Quick-look mode for 'tldr'-style asks. Each prompt represents a realistic question a customer might ask their AI agent in an environment with ExtraHop MCP connected.",
   "evals": [
     {
       "id": 1,
@@ -14,7 +14,7 @@
         {"text": "Uses status values from the allowed vocabulary only: Normal, Warning, Degraded, Insufficient Evidence (title case in visible output)"},
         {"text": "Calls out any error reclassification (e.g. NXDOMAIN excluded from the DNS actionable rate) in a bullet or the Key insight"},
         {"text": "Default mode body does NOT include an HSI percentage, a Confidence line, a 'What changed' table, or a YAML footer"},
-        {"text": "Device and device-group identifiers appear in backticks. Device identifiers remain unlinked. Device-group links use the available console FQDN; never fabricates URLs."},
+        {"text": "Device and device-group identifiers appear in backticks and remain unlinked."},
         {"text": "No box-drawing characters (\u2550, \u250c, \u2510, \u2500, \u2502, \u2534, \u252c, \u2514, \u2518) in the output"}
       ],
       "files": []
@@ -255,6 +255,18 @@
         {"text": "Completes the health check and keeps all device identifiers unlinked"},
         {"text": "Does not reuse the pasted device URL or its IDs to construct device links"},
         {"text": "Briefly explains the device-link limitation"}
+      ],
+      "files": []
+    },
+    {
+      "id": 20,
+      "name": "device-group-links-deferred-with-known-id",
+      "prompt": "Run a health check on the HTTP Server Activity device group (ID 47). Our console is https://tenant.cloud.extrahop.com. Include a link to the group in the HTML report.",
+      "expected_output": "Completes the group health check and HTML report, keeping the group and member-device identifiers unlinked. Briefly explains that reliable device-group links are not currently supported.",
+      "assertions": [
+        {"text": "Completes the group health check and HTML report"},
+        {"text": "Keeps the group and member-device identifiers unlinked, including the title and action items"},
+        {"text": "Does not construct group URLs from the supplied console host and numeric group ID"}
       ],
       "files": []
     }

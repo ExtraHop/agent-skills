@@ -5,8 +5,7 @@ skill **maps applications** — it does not grade health, so do not emit a statu
 (that is `extrahop-health-check`'s job). Keep visible prose short; let the tables carry
 the detail.
 
-Device-group identifiers are entity links when a console FQDN is available (see Console Deep-Links in
-`SKILL.md`), otherwise plain backticked names/IPs. Never fabricate a server, IP, Host
+Identifiers are backticked names/IPs. Never fabricate a server, IP, Host
 header, SNI, or link.
 
 ---

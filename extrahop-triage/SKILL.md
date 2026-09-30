@@ -222,7 +222,7 @@ and explain why no action is needed.
 
 ### Console deep-links
 
-**Do not create device links.** Current tools cannot build them reliably; render device identifiers as plain text in all output formats.
+**Do not create device or device-group links.** Current tools cannot build them reliably; render their identifiers as plain text in all output formats.
 
 When the console FQDN is available, link each detection ID
 and created investigation in a Detection Set to its exact page in the RevealX

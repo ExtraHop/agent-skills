@@ -72,7 +72,6 @@ Omit **What to do** entirely on healthy reports. Cap each section at 3–4 items
 ### Typography
 
 - **Identifiers in backticks.** Device names, hostnames, IPs, metric names. The single most important typography rule.
-- **Link the first occurrence** of each device group identifier to its console page at the assessment window — `` [`HTTP Servers`](https://...) ``, backticks outside the link. See `console-urls.md` for the URL syntax. Re-link in *What to do* and *Drill in further* even if already linked in the body, since those sections are skim-points. Never fabricate URLs.
 - **Magnitudes:** `1.4s` not `1400ms` once ≥ 1s. `142 GB` not bytes. `2.3%` not `0.023`.
 - **Time format:** relative + local TZ ("Last 24 hours"). UTC anchor only in YAML.
 - **No fake alignment.** Don't pad with whitespace; Markdown can't right-justify.

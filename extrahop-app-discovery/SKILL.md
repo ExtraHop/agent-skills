@@ -72,10 +72,6 @@ For tagging mode: `extrahop_search_devicetags`,
 `extrahop_assign_devicetag_to_devices`, `extrahop_unassign_devicetag_from_devices`,
 and the tags must pre-exist.
 
-For console deep-links: `extrahop_get_appliance_metadata` supplies the console FQDN
-(`display_host` / `external_hostname`). If absent
-(older MCP server), omit links rather than guessing.
-
 If a required tool is missing, say so and proceed with what's available. Without
 `extrahop_search_records`, stay at the device + metric level and recommend the
 operator confirm front-end-to-back-end pool membership in the RevealX UI — record
@@ -156,7 +152,6 @@ interactive and confirm first.
 | Collect metrics | `extrahop_execute_metric_query` | `cycle: "auto"`; `_server`/`_client` suffix at device level; `_detail` categories for Host/method/status-code breakdowns |
 | Transaction pivot | `extrahop_search_records` | The front-end→back-end correlation; `~http`, `~ssl`, `~flow`; max 7d |
 | Tags | `extrahop_search_devicetags` / `extrahop_assign_devicetag_to_devices` / `extrahop_unassign_devicetag_from_devices` | Tagging mode only |
-| Console FQDN | `extrahop_get_appliance_metadata` | Deep-links; FQDN from `display_host`/`external_hostname` |
 
 Query patterns:
 
@@ -193,15 +188,7 @@ a sentence or two of framing.
 
 ## Console Deep-Links
 
-**Do not create device links.** Current tools cannot build them reliably; render device identifiers as plain text in all output formats.
-
-When the report names a device group and the console FQDN is available, wrap
-the identifier in a Markdown link to its RevealX console page at the discovery time
-window, so the operator can jump from the inventory to the live view. The FQDN comes from
-`extrahop_get_appliance_metadata` — `display_host` (fall back to `external_hostname`).
-If that tool is unavailable and no FQDN was pasted earlier, present plain backticked
-identifiers — a correct unlinked report beats a fabricated link. Never fabricate the
-FQDN.
+**Do not create device or device-group links.** Current tools cannot build them reliably; render their identifiers as plain text in all output formats.
 
 ## Principles
 

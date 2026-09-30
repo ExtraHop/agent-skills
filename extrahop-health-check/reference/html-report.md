@@ -121,9 +121,8 @@ worked HTML example. Your job is content, not design.
    input and may contain `&`, `<`, `>`, `"`, or `'`. In text/element content
    (findings, Key insight, `<span class="id">`, subtitle, meta) escape `&`→`&amp;`,
    `<`→`&lt;`, `>`→`&gt;`. Inside an attribute (an `href`, `title`, `data-*`)
-   also escape `"`→`&quot;` and `'`→`&#39;`. For the console-link `href`,
-   URL-encode any identifier interpolated into the path/query (e.g. `encodeURIComponent`
-   on a group ID) so a stray character can't break out of the URL
+   also escape `"`→`&quot;` and `'`→`&#39;`. For an `href`,
+   URL-encode any identifier interpolated into the path/query so a stray character can't break out of the URL
    or inject markup. A device literally named `<img src=x onerror=…>` must render
    as text, never execute. When in doubt, escape — double-escaping a plain name is
    harmless; leaving one unescaped is an injection.
@@ -231,35 +230,6 @@ confidence stay internal, exactly as in chat. Don't surface them.
 
 ---
 
-## Console deep-links
-
-See `console-urls.md` for URL syntax and the protocol-slug table.
-
-**What to link.** Every device group that appears as an identifier:
-
-- The **first mention of each device group in each section** — Findings, Key insight,
-  What to do, Drill in further. Re-linking across sections is intended: each
-  section is a skim-point, and the reader may jump straight to one. (Within a
-  single section, link only the first mention of a given device group; later mentions
-  in that same section stay plain.)
-- Point each link at the **protocol page the finding is about** — `http-server`,
-  `db-server`, `tcp`, `dns-server`, etc. — or `/overview` when the mention is
-  general or spans protocols. Match the URL's time window to the assessment
-  window.
-
-In HTML, wrap the `<span class="id">` in an anchor:
-`<a href="https://<fqdn>/extrahop/#/metrics/devicegroups/<group_id>/<slug>?from=1&interval_type=HR&until=0"><span class="id">HTTP Servers</span></a>`.
-Masthead links (the title) are styled to stay white with a soft underline; body
-links use the accent color — both are handled by the template CSS, so just wrap
-the identifier.
-
-**If the FQDN is unavailable, do not fabricate a link** — leave the
-identifier as a plain `<span class="id">`. A correct unlinked report beats a
-wrong-linked one. When it's available, though, link every device group: sparse linking
-is the most common defect in generated reports.
-
----
-
 ## Never fabricate
 
 Report only what the tools returned. Never invent devices, IPs, hostnames, metric
@@ -282,7 +252,4 @@ the bar here is higher, not lower.
 - Findings are verdict-first, 4–6 bullets, identifiers in `<span class="id">`.
 - "What to do" is omitted on healthy reports.
 - No table, Root Cause, Evidence, Limits, HSI, or confidence content was added.
-- Every device group is console-linked on its first mention in each section
-  — or all left plain when the FQDN is unavailable.
-  Never fabricated.
 - No placeholder/example content from the template remains.

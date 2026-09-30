@@ -4,9 +4,7 @@ Turn a Detection Set into a launchpad: link each detection and investigation to 
 jump from the triage conclusion straight to the evidence in one click. The chat
 session is the triage; the console is where the analyst takes it forward.
 
-This mirrors the deep-link behavior in the companion `extrahop-health-check`
-skill, including the same source tool (`extrahop_get_appliance_metadata`) and
-the same hard rule: **never fabricate a URL.** A correct unlinked report is
+**Never fabricate a URL.** A correct unlinked report is
 strictly better than a confidently wrong link that sends an analyst to the
 wrong tenant or a 404.
 

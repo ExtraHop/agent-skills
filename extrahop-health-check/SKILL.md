@@ -13,7 +13,6 @@ Tools are named with the `extrahop_` prefix below (e.g. `extrahop_search_devices
 - **`reference/output-templates.md`** — output format (Default and Detailed modes), NEW/CHRONIC modifier, bimodal fleet rule, stale-data handling, continuation prompt, worked examples. Load before emitting your report.
 - **`reference/html-report.md`** — the branded, self-contained HTML report deliverable (opt-in third output mode). Load when the user asks for an artifact — "HTML," "PDF," "shareable," "deliverable," "one-pager," "export," or "for leadership" (the word "report" alone is not an HTML trigger; see Mode selection under Output).
 - **`reference/diagnostic-playbooks.md`** — multi-tier root-cause recipes. Load when a category flags Warning or Degraded.
-- **`reference/console-urls.md`** — how to construct deep-links into the RevealX console (device groups) at the right time window. Load before emitting any default-mode report that names a device group.
 - **`reference/scheduling.md`** — per-client recipes for recurring runs. Load only when the user asks about scheduling.
 
 ## Scope
@@ -39,8 +38,6 @@ Modifiers parsed from natural language: time window (`1h`, `6h`, `24h`, `7d`), c
 Required MCP tools: `extrahop_search_devicegroups`, `extrahop_search_devices`, `extrahop_get_device`, `extrahop_execute_metric_query`, `extrahop_search_metric_catalog`, `extrahop_search_records`.
 
 For tagging mode: pre-existing tags `Health-Warning` and `Health-Degraded`, plus `extrahop_assign_devicetag_to_devices` / `extrahop_unassign_devicetag_from_devices`.
-
-For console deep-links: `extrahop_get_appliance_metadata` supplies the console FQDN (its `display_host` / `external_hostname` fields) used to build URLs. If it's absent (older MCP server), the skill omits links rather than guessing — see Console Deep-Links.
 
 If a required tool is missing, say so and proceed with what's available.
 
@@ -200,7 +197,6 @@ Include a TAGGING SUMMARY in the report showing devices tagged, devices cleared,
 | Device details | `extrahop_get_device` | When you have OID, need role/name |
 | Transaction drill-down | `extrahop_search_records` | Only on sustained Warning/Degraded; max 7d |
 | Apply / remove tags | `extrahop_assign_devicetag_to_devices` / `extrahop_unassign_devicetag_from_devices` | Tagging mode only |
-| Get console FQDN | `extrahop_get_appliance_metadata` | For deep-links; FQDN from `display_host`/`external_hostname`. Absent on older servers → omit links |
 
 Query patterns:
 
@@ -242,19 +238,7 @@ Critical rules across all modes:
 
 ## Console Deep-Links
 
-**Do not create device links.** Current tools cannot build them reliably; render device identifiers as plain text in all output formats.
-
-When the report names a device group, wrap that identifier in a Markdown link to the corresponding page in the RevealX console at the assessment time window. This turns the report into a launchpad — the operator clicks the identifier and lands on the right protocol page, scoped to the right window, instead of navigating manually.
-
-Required inputs: the **console FQDN** (e.g. `revealx.example.com`).
-
-The FQDN comes from the **`extrahop_get_appliance_metadata`** tool — call it once per session and cache the result. Read the **FQDN** from the `display_host` field (fall back to `external_hostname`). **If `extrahop_get_appliance_metadata` is not available (the user is on an older MCP server that doesn't expose it) and you can't obtain the FQDN another way, do not construct any links** — emit the report with plain backticked identifiers. A correct unlinked report is strictly better than a fabricated one. Never fabricate the FQDN.
-
-When `extrahop_get_appliance_metadata` is unavailable, the fallback is a console URL the user pasted earlier or prior session memory. Cache the FQDN for the session.
-
-Apply in default mode only: the problem statement and findings bullets (first mention of each identifier), "What to do" actions naming a device group, "Drill in further" items, and Key insight (only if not already linked above). Skip in detailed mode YAML, stale-data refusals, quick-look mode, and tagging-mode reports.
-
-Full URL syntax, time-parameter mapping, protocol slug table, and worked examples in `console-urls.md`.
+**Do not create device or device-group links.** Current tools cannot build them reliably; render their identifiers as plain text in all output formats.
 
 ## Scheduling
 

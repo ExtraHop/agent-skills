@@ -510,6 +510,5 @@ When detected, return `Insufficient Evidence` for affected categories with recom
 | `extrahop_search_metric_catalog` | Can't verify uncommon metric names | Use known metrics from this reference; flag uncertainty |
 | `extrahop_search_records` | No transaction drill-down | Limit to metric level; recommend operator query via ExtraHop UI |
 | `extrahop_assign_devicetag_to_devices` / `extrahop_unassign_devicetag_from_devices` | Tagging unavailable | Run report-only; note tags wouldn't persist |
-| `extrahop_get_appliance_metadata` | No FQDN for deep-links | Emit reports with plain backticked identifiers; never fabricate URLs |
 
 When a tool is missing, mention it once in Key insight and proceed with what's available. Don't refuse to run.
